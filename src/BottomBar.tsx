@@ -1,5 +1,14 @@
 // Bottom app bar in solidjs
 //
+import { open } from "@tauri-apps/plugin-dialog";
+async function openFile() {
+  console.log("open file");
+  const file = await open({
+    multiple: false,
+    directory: false,
+  });
+  console.log(file);
+}
 
 export default function BottomBar() {
   return (
@@ -14,6 +23,7 @@ function AddButton() {
   return (
     <button
       type="button"
+      onClick={openFile}
       class="relative border-[0.5px] rounded h-5 w-8 hover:bg-gray-300 p-0 m-0 leading-none"
     >
       +

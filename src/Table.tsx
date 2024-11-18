@@ -46,30 +46,29 @@ const range = (len: number) => {
   return arr;
 };
 
-const newPerson = (d: number): FileEntry => {
+const newPerson = (d: string): FileEntry => {
   return {
-    file: "bob",
+    file: d,
     status: "relationship",
-    size: d,
-    savings: d,
+    size: 1,
+    savings: 2,
   };
 };
 
-export function makeData(...lens: number[]) {
-  const makeDataLevel = (depth = 0): FileEntry[] => {
-    const len = lens[depth] ?? 0;
-    return range(len).map((d): FileEntry => {
-      return {
-        ...newPerson(d),
-      };
-    });
-  };
+// export function makeData(...lens: number[]) {
+//   const makeDataLevel = (depth = 0): FileEntry[] => {
+//     const len = lens[depth] ?? 0;
+//     return range(len).map((d): FileEntry => {
+//       return {
+//         ...newPerson(d),
+//       };
+//     });
+//   };
 
-  return makeDataLevel();
-}
+//   return makeDataLevel();
+// }
 
-export function Table() {
-  const [data, setData] = createSignal(makeData(1000));
+export function Table(props: { data: string[] }) {
   const [sorting, setSorting] = createSignal<SortingState>([]);
 
   const columns: ColumnDef<FileEntry>[] = [
@@ -93,7 +92,7 @@ export function Table() {
 
   const table = createSolidTable({
     get data() {
-      return data();
+      return props.data.map((d) => newPerson(d));
     },
     columns,
     state: {
