@@ -147,7 +147,7 @@ export function Table() {
         <tbody>
           <For each={table.getRowModel().rows}>
             {(row) => (
-              <tr class="even:bg-gray-800">
+              <tr class="even:bg-gray-800 hover:bg-gray-700 cursor-default">
                 <For each={row.getVisibleCells()}>
                   {(cell) => (
                     <td>
