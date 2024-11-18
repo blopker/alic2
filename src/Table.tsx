@@ -8,69 +8,12 @@ import {
   createSolidTable,
 } from "@tanstack/solid-table";
 import { createSignal, Show } from "solid-js";
-// export default function Table(props: { data: string[] }) {
-//   return (
-//     <table class="table-auto w-full">
-//       {/* <thead>
-//         <tr>
-//           {props.data.map((d) => (
-//             <th>{d}</th>
-//           ))}
-//         </tr>
-//       </thead> */}
-//       <tbody>
-//         <For each={props.data}>
-//           {(d) => (
-//             <tr>
-//               <td>{d}</td>
-//             </tr>
-//           )}
-//         </For>
-//       </tbody>
-//     </table>
-//   );
-// }
+import { useFiles } from "./contexts";
+import type { FileEntry } from "./files";
 
-export type FileEntry = {
-  file: string;
-  status: string;
-  size: number;
-  savings: number;
-};
-
-const range = (len: number) => {
-  const arr: number[] = [];
-  for (let i = 0; i < len; i++) {
-    arr.push(i);
-  }
-  return arr;
-};
-
-const newPerson = (d: string): FileEntry => {
-  return {
-    file: d,
-    status: "relationship",
-    size: 1,
-    savings: 2,
-  };
-};
-
-// export function makeData(...lens: number[]) {
-//   const makeDataLevel = (depth = 0): FileEntry[] => {
-//     const len = lens[depth] ?? 0;
-//     return range(len).map((d): FileEntry => {
-//       return {
-//         ...newPerson(d),
-//       };
-//     });
-//   };
-
-//   return makeDataLevel();
-// }
-
-export function Table(props: { data: string[] }) {
+export function Table() {
   const [sorting, setSorting] = createSignal<SortingState>([]);
-
+  const [files] = useFiles();
   const columns: ColumnDef<FileEntry>[] = [
     {
       accessorKey: "file",
@@ -92,7 +35,7 @@ export function Table(props: { data: string[] }) {
 
   const table = createSolidTable({
     get data() {
-      return props.data.map((d) => newPerson(d));
+      return files();
     },
     columns,
     state: {

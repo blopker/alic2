@@ -2,8 +2,10 @@ import { getCurrentWebview, type DragDropEvent } from "@tauri-apps/api/webview";
 import type { Event } from "@tauri-apps/api/event";
 import { createSignal, onCleanup, Show } from "solid-js";
 import { Transition } from "solid-transition-group";
+import { useFiles } from "./contexts";
 
-export default function Dropper(props: { onDrop: (files: string[]) => void }) {
+export default function Dropper() {
+  const [_, { addFile }] = useFiles();
   const [showDropper, setShowDropper] = createSignal(false);
   const cancel = getCurrentWebview().onDragDropEvent(
     (e: Event<DragDropEvent>) => {
@@ -13,7 +15,14 @@ export default function Dropper(props: { onDrop: (files: string[]) => void }) {
         setShowDropper(false);
       } else if (e.payload.type === "drop") {
         setShowDropper(false);
-        props.onDrop(e.payload.paths);
+        for (const path of e.payload.paths) {
+          addFile({
+            file: path,
+            status: "",
+            size: 1,
+            savings: 1,
+          });
+        }
       }
     },
   );
