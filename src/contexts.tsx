@@ -11,6 +11,7 @@ interface FilesContextValue {
   addFile: (file: FileEntry) => void;
   removeFile: (file: FileEntry) => void;
   updateFile: (file: FileEntry) => void;
+  clearFiles: () => void;
 }
 
 const FilesContext = createContext<
@@ -38,6 +39,9 @@ export function FilesProvider(props: {
         setFiles((files) =>
           files.map((f) => (f.file === file.file ? file : f)),
         );
+      },
+      clearFiles: () => {
+        setFiles([]);
       },
     },
   ];

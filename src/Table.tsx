@@ -16,11 +16,11 @@ export function Table() {
   const [files] = useFiles();
   const columns: ColumnDef<FileEntry>[] = [
     {
-      accessorKey: "file",
+      accessorKey: "status",
       cell: (info) => info.getValue(),
     },
     {
-      accessorKey: "status",
+      accessorKey: "file",
       cell: (info) => info.getValue(),
     },
     {
@@ -50,15 +50,15 @@ export function Table() {
   });
 
   return (
-    <div class="w-full">
+    <div class="w-full grow">
       <table class="w-full">
-        <thead class="sticky top-0 bg-gray-500">
+        <thead class="sticky top-0 bg-[#1b1b1b] border-b-[1px] border-gray-700">
           <For each={table.getHeaderGroups()}>
             {(headerGroup) => (
               <tr>
                 <For each={headerGroup.headers}>
                   {(header) => (
-                    <th colSpan={header.colSpan}>
+                    <th class="px-2" colSpan={header.colSpan}>
                       <Show when={!header.isPlaceholder}>
                         <div
                           class={
@@ -74,8 +74,8 @@ export function Table() {
                             header.getContext(),
                           )}
                           {{
-                            asc: " 🔼",
-                            desc: " 🔽",
+                            asc: " ↑",
+                            desc: " ↓",
                           }[header.column.getIsSorted() as string] ?? null}
                         </div>
                       </Show>
@@ -89,10 +89,10 @@ export function Table() {
         <tbody>
           <For each={table.getRowModel().rows}>
             {(row) => (
-              <tr class="even:bg-gray-800 hover:bg-gray-700 cursor-default">
+              <tr class="even:bg-[#262626] hover:bg-gray-700 cursor-default">
                 <For each={row.getVisibleCells()}>
                   {(cell) => (
-                    <td>
+                    <td class="px-2">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
@@ -105,8 +105,6 @@ export function Table() {
           </For>
         </tbody>
       </table>
-      <div>{table.getRowModel().rows.length} Rows</div>
-      <pre>{JSON.stringify(sorting(), null, 2)}</pre>
     </div>
   );
 }

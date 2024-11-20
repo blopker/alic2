@@ -30,18 +30,18 @@ export default function Dropper() {
     cancel.then((cancel) => cancel());
   });
   return (
-    <Transition name="slide-fade">
+    <Transition name="fade">
       <Show when={showDropper()}>
-        <DropOverlay />
+        <DropOverlay showDropper={showDropper()} />
       </Show>
     </Transition>
   );
 }
 
-function DropOverlay() {
+function DropOverlay(props: { showDropper: boolean }) {
   return (
-    <div class="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-80 transition-all z-50">
-      <div class="text-8xl">👇</div>
+    <div class="frost absolute top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-80 transition-all z-50">
+      <div class="text-8xl emojo">👇</div>
     </div>
   );
 }

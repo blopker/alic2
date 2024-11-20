@@ -13,17 +13,20 @@ body {
     -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
 
-.slide-fade-enter-active,
-.slide-fade-exit-active {
+.frost {
+    backdrop-filter: blur(10px);
+}
+
+.fade-enter-active,
+.fade-exit-active {
     transition:
         opacity 0.3s,
         transform 0.3s;
 }
-.slide-fade-enter,
-.slide-fade-exit-to {
-    transform: translateY(10px);
+.fade-enter,
+.fade-exit-to {
     opacity: 0;
 }
-.slide-fade-enter {
-    transform: translateY(-10px);
+.fade-enter {
+    opacity: 1;
 }

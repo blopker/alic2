@@ -20,6 +20,20 @@
         "resizable": true,
         "fullscreen": false,
         "center": true
+      },
+      {
+        "title": "Settings",
+        "label": "settings",
+        "width": 600,
+        "height": 370,
+        "minWidth": 600,
+        "minHeight": 370,
+        "resizable": true,
+        "fullscreen": false,
+        "center": true,
+        "create": false,
+        "dragDropEnabled": false,
+        "url": "settings.html"
       }
     ],
     "security": {

@@ -1,13 +1,18 @@
 // Bottom app bar in solidjs
-//
+import { FaSolidXmark } from "solid-icons/fa";
+import { VsSettings } from "solid-icons/vs";
 import { open } from "@tauri-apps/plugin-dialog";
 import { useFiles } from "./contexts";
+import type { JSXElement } from "solid-js";
+import { invoke } from "@tauri-apps/api/core";
 
 export default function BottomBar() {
   return (
-    <div class="fixed bottom-0 left-0 right-0 flex items-center justify-between bg-gray-400 h-8 px-2 shadow-2xl">
+    <div class="fixed bottom-0 left-0 right-0 flex items-center justify-between bg-[#403F3F] h-10 px-2 shadow-2xl">
       <AddButton />
-      <div>hi</div>
+      <span class="grow" />
+      <SettingsButton />
+      <ClearButton />
     </div>
   );
 }
@@ -17,27 +22,71 @@ function AddButton() {
   async function openFile() {
     console.log("open file");
     const file = await open({
-      multiple: false,
+      multiple: true,
       directory: false,
+      filters: [
+        {
+          name: "Images",
+          extensions: ["png", "jpeg", "jpg", "gif", "webp", "tiff"],
+        },
+      ],
     });
     console.log(file);
     if (!file) {
       return;
     }
-    addFile({
-      file: file,
-      status: "",
-      size: 1,
-      savings: 1,
-    });
+    for (const f of file) {
+      addFile({
+        file: f,
+        status: "",
+        size: 1,
+        savings: 1,
+      });
+    }
   }
+  return <Button onClick={openFile}>+</Button>;
+}
+
+function ClearButton() {
+  const [files, { clearFiles }] = useFiles();
+  return (
+    <Button onClick={clearFiles} disabled={files().length === 0}>
+      <span class="px-2 text-sm flex items-center gap-1">
+        <FaSolidXmark /> Clear
+      </span>
+    </Button>
+  );
+}
+
+async function settingsWindow() {
+  await invoke("open_settings_window");
+}
+
+function SettingsButton() {
+  return (
+    <button
+      onClick={settingsWindow}
+      type="button"
+      class="relative text-center rounded hover:gray-600 transition-all p-2"
+    >
+      <VsSettings />
+    </button>
+  );
+}
+
+function Button(props: {
+  onClick: () => void;
+  children: JSXElement;
+  disabled?: boolean;
+}) {
   return (
     <button
       type="button"
-      onClick={openFile}
-      class="relative border-[0.5px] rounded h-5 w-8 hover:bg-gray-300 p-0 m-0 leading-none"
+      onClick={props.onClick}
+      disabled={props.disabled}
+      class="relative text-center border-[0.5px] border-gray-800 rounded min-h-6 min-w-10 enabled:hover:bg-gray-600 p-0 m-0 leading-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
     >
-      +
+      {props.children}
     </button>
   );
 }
