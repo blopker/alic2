@@ -6,6 +6,7 @@ import {
   type JSXElement,
 } from "solid-js";
 import type { FileEntry } from "./files";
+import { compressImage } from "./compress";
 
 interface FilesContextValue {
   addFile: (file: FileEntry) => void;
@@ -31,6 +32,7 @@ export function FilesProvider(props: {
           return;
         }
         setFiles((files) => [...files, file]);
+        compressImage(file.file);
       },
       removeFile: (file: FileEntry) => {
         setFiles((files) => files.filter((f) => f.file !== file.file));

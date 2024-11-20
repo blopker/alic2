@@ -4,7 +4,7 @@ import { VsSettings } from "solid-icons/vs";
 import { open } from "@tauri-apps/plugin-dialog";
 import { useFiles } from "./contexts";
 import type { JSXElement } from "solid-js";
-import { invoke } from "@tauri-apps/api/core";
+import { commands } from "./bindings";
 
 export default function BottomBar() {
   return (
@@ -59,7 +59,7 @@ function ClearButton() {
 }
 
 async function settingsWindow() {
-  await invoke("open_settings_window");
+  await commands.openSettingsWindow();
 }
 
 function SettingsButton() {
