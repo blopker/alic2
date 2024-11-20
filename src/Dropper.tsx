@@ -2,10 +2,9 @@ import { getCurrentWebview, type DragDropEvent } from "@tauri-apps/api/webview";
 import type { Event } from "@tauri-apps/api/event";
 import { createSignal, onCleanup, Show } from "solid-js";
 import { Transition } from "solid-transition-group";
-import { useFiles } from "./contexts";
+import { addFile } from "./store";
 
 export default function Dropper() {
-  const [_, { addFile }] = useFiles();
   const [showDropper, setShowDropper] = createSignal(false);
   const cancel = getCurrentWebview().onDragDropEvent(
     (e: Event<DragDropEvent>) => {
@@ -16,12 +15,7 @@ export default function Dropper() {
       } else if (e.payload.type === "drop") {
         setShowDropper(false);
         for (const path of e.payload.paths) {
-          addFile({
-            file: path,
-            status: "",
-            size: 1,
-            savings: 1,
-          });
+          addFile(path);
         }
       }
     },
@@ -32,13 +26,13 @@ export default function Dropper() {
   return (
     <Transition name="fade">
       <Show when={showDropper()}>
-        <DropOverlay showDropper={showDropper()} />
+        <DropOverlay />
       </Show>
     </Transition>
   );
 }
 
-function DropOverlay(props: { showDropper: boolean }) {
+function DropOverlay() {
   return (
     <div class="frost absolute top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-80 transition-all z-50">
       <div class="text-8xl emojo">👇</div>

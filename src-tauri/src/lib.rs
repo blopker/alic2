@@ -12,11 +12,6 @@ fn greet(name: &str) -> String {
 }
 
 #[tauri::command]
-fn get_file_info(path: &str) -> String {
-    format!("File info for {}", path)
-}
-
-#[tauri::command]
 #[specta::specta]
 async fn open_settings_window(app: tauri::AppHandle) {
     let window_label = "settings";
@@ -41,11 +36,12 @@ async fn open_settings_window(app: tauri::AppHandle) {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let mut builder = Builder::<tauri::Wry>::new()
+    let builder = Builder::<tauri::Wry>::new()
         // Then register them (separated by a comma)
         .commands(collect_commands![
             open_settings_window,
-            compress::process_img
+            compress::process_img,
+            compress::get_file_info
         ]);
 
     #[cfg(debug_assertions)] // <- Only export on non-release builds

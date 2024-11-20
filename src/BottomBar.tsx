@@ -2,7 +2,7 @@
 import { FaSolidXmark } from "solid-icons/fa";
 import { VsSettings } from "solid-icons/vs";
 import { open } from "@tauri-apps/plugin-dialog";
-import { useFiles } from "./contexts";
+import { store, addFile, clearFiles } from "./store";
 import type { JSXElement } from "solid-js";
 import { commands } from "./bindings";
 
@@ -18,7 +18,6 @@ export default function BottomBar() {
 }
 
 function AddButton() {
-  const [_, { addFile }] = useFiles();
   async function openFile() {
     console.log("open file");
     const file = await open({
@@ -36,21 +35,15 @@ function AddButton() {
       return;
     }
     for (const f of file) {
-      addFile({
-        file: f,
-        status: "",
-        size: 1,
-        savings: 1,
-      });
+      addFile(f);
     }
   }
   return <Button onClick={openFile}>+</Button>;
 }
 
 function ClearButton() {
-  const [files, { clearFiles }] = useFiles();
   return (
-    <Button onClick={clearFiles} disabled={files().length === 0}>
+    <Button onClick={clearFiles} disabled={store.files.length === 0}>
       <span class="px-2 text-sm flex items-center gap-1">
         <FaSolidXmark /> Clear
       </span>

@@ -1,9 +1,10 @@
 import { commands, type CompressResult } from "./bindings";
+import type { FileEntry } from "./bindings";
 
-export async function compressImage(path: string): Promise<CompressResult> {
+export async function compressImage(file: FileEntry): Promise<CompressResult> {
   const res = await commands.processImg({
     postfix: ".min",
-    path,
+    path: file.path,
     resize: true,
     resize_width: 1000,
     resize_height: 1000,

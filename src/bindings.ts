@@ -15,6 +15,14 @@ async processImg(parameters: Parameters) : Promise<Result<CompressResult, string
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
+},
+async getFileInfo(file: FileEntry) : Promise<Result<FileEntry, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_file_info", { file }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 }
 }
 
@@ -29,6 +37,8 @@ async processImg(parameters: Parameters) : Promise<Result<CompressResult, string
 /** user-defined types **/
 
 export type CompressResult = { path: string; out_path: string; result: string }
+export type FileEntry = { path: string; file: string | null; status: FileEntryStatus; size: number | null; savings: number | null; ext: string | null; error: string | null }
+export type FileEntryStatus = "Processing" | "Compressing" | "Complete" | "Error"
 export type ImageType = "JPEG" | "PNG" | "WEBP" | "GIF" | "TIFF"
 export type Parameters = { postfix: string; path: string; jpeg_quality: number; png_quality: number; webp_quality: number; gif_quality: number; resize: boolean; resize_width: number; resize_height: number; convert_extension: ImageType | null }
 

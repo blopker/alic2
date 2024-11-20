@@ -1,4 +1,4 @@
-import { For } from "solid-js";
+import { createEffect, For } from "solid-js";
 import {
   flexRender,
   getCoreRowModel,
@@ -8,12 +8,12 @@ import {
   createSolidTable,
 } from "@tanstack/solid-table";
 import { createSignal, Show } from "solid-js";
-import { useFiles } from "./contexts";
-import type { FileEntry } from "./files";
+import { store } from "./store";
+import type { FileEntry } from "./bindings";
 
 export function Table() {
   const [sorting, setSorting] = createSignal<SortingState>([]);
-  const [files] = useFiles();
+  const [files, setFiles] = createSignal<FileEntry[]>([]);
   const columns: ColumnDef<FileEntry>[] = [
     {
       accessorKey: "status",
@@ -35,7 +35,7 @@ export function Table() {
 
   const table = createSolidTable({
     get data() {
-      return files();
+      return store.files;
     },
     columns,
     state: {
@@ -46,7 +46,7 @@ export function Table() {
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    debugTable: true,
+    // debugTable: true,
   });
 
   return (
