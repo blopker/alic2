@@ -13,23 +13,18 @@ import type { FileEntry } from "./bindings";
 
 export function Table() {
   const [sorting, setSorting] = createSignal<SortingState>([]);
-  const [files, setFiles] = createSignal<FileEntry[]>([]);
   const columns: ColumnDef<FileEntry>[] = [
     {
       accessorKey: "status",
-      cell: (info) => info.getValue(),
     },
     {
       accessorKey: "file",
-      cell: (info) => info.getValue(),
     },
     {
       accessorKey: "savings",
-      cell: (info) => info.getValue(),
     },
     {
       accessorKey: "size",
-      cell: (info) => info.getValue(),
     },
   ];
 
@@ -58,25 +53,28 @@ export function Table() {
               <tr>
                 <For each={headerGroup.headers}>
                   {(header) => (
-                    <th class="px-2" colSpan={header.colSpan}>
+                    <th
+                      class="px-2 text-left capitalize"
+                      colSpan={header.colSpan}
+                    >
                       <Show when={!header.isPlaceholder}>
                         <div
-                          class={
-                            header.column.getCanSort()
-                              ? "cursor-pointer select-none"
-                              : undefined
-                          }
+                          classList={{
+                            "cursor-pointer select-none":
+                              header.column.getCanSort(),
+                            grow: header.column.id === "file",
+                          }}
                           onClick={header.column.getToggleSortingHandler()}
                           onKeyPress={() => {}}
                         >
+                          {{
+                            asc: "↑ ",
+                            desc: "↓ ",
+                          }[header.column.getIsSorted() as string] ?? null}
                           {flexRender(
                             header.column.columnDef.header,
                             header.getContext(),
                           )}
-                          {{
-                            asc: " ↑",
-                            desc: " ↓",
-                          }[header.column.getIsSorted() as string] ?? null}
                         </div>
                       </Show>
                     </th>
