@@ -5,11 +5,11 @@ use tauri::{
     Manager,
 };
 use tauri_specta::{collect_commands, Builder};
-// Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}? You've been greeted from Rust??!", name)
-}
+
+// #[tauri::command]
+// fn greet(name: &str) -> String {
+//     format!("Hello, {}? You've been greeted from Rust??!", name)
+// }
 
 #[tauri::command]
 #[specta::specta]
