@@ -8,6 +8,7 @@ html {
 }
 
 body {
+    overscroll-behavior-y: none;
     height: 100%;
     overflow: auto;
     -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */

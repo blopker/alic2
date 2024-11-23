@@ -1,0 +1,10 @@
+{
+  "files": {
+    "ignore": ["src/bindings.ts"],
+    "ignoreUnknown": true
+  },
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git"
+  }
+}

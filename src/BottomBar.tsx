@@ -1,10 +1,10 @@
+import { open } from "@tauri-apps/plugin-dialog";
 // Bottom app bar in solidjs
 import { FaSolidXmark } from "solid-icons/fa";
 import { VsSettings } from "solid-icons/vs";
-import { open } from "@tauri-apps/plugin-dialog";
-import { store, addFile, clearFiles } from "./store";
 import type { JSXElement } from "solid-js";
 import { commands } from "./bindings";
+import { addFile, clearFiles, store } from "./store";
 
 export default function BottomBar() {
   return (

@@ -1,6 +1,7 @@
-import { getCurrentWebview, type DragDropEvent } from "@tauri-apps/api/webview";
 import type { Event } from "@tauri-apps/api/event";
-import { createSignal, onCleanup, Show } from "solid-js";
+import { type DragDropEvent, getCurrentWebview } from "@tauri-apps/api/webview";
+import { BsArrowDownSquare } from "solid-icons/bs";
+import { Show, createSignal, onCleanup } from "solid-js";
 import { Transition } from "solid-transition-group";
 import { addFile } from "./store";
 
@@ -35,7 +36,7 @@ export default function Dropper() {
 function DropOverlay() {
   return (
     <div class="frost absolute top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-80 transition-all z-50">
-      <div class="text-8xl emojo">👇</div>
+      <BsArrowDownSquare size={100} />
     </div>
   );
 }

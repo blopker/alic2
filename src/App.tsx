@@ -1,18 +1,17 @@
-// import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
-import Dropper from "./Dropper";
 import BottomBar from "./BottomBar";
+import Dropper from "./Dropper";
 import Table from "./Table";
 
 function App() {
   return (
-    <>
-      <main class="h-full justify-between w-full">
+    <div class="flex flex-col h-screen">
+      <main class="grow w-full">
         <Dropper />
         <Table />
       </main>
       <BottomBar />
-    </>
+    </div>
   );
 }
 

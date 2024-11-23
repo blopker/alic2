@@ -1,21 +1,51 @@
-import { createEffect, For } from "solid-js";
 import {
+  type ColumnDef,
+  type SortingState,
+  createSolidTable,
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
-  type SortingState,
-  type ColumnDef,
-  createSolidTable,
 } from "@tanstack/solid-table";
-import { createSignal, Show } from "solid-js";
+import { BsArrowDownSquare } from "solid-icons/bs";
+import { FaSolidCircleNotch, FaSolidXmark } from "solid-icons/fa";
+import { FaSolidCheck } from "solid-icons/fa";
+import { TbDots } from "solid-icons/tb";
+import { For, Match, Switch } from "solid-js";
+import { Show, createSignal } from "solid-js";
+import type { FileEntry, FileEntryStatus } from "./bindings";
 import { store } from "./store";
-import type { FileEntry } from "./bindings";
+import { files } from "./testdata";
 
-export function Table() {
+const useTestData = false;
+
+function StatusIcons(props: { status: FileEntryStatus }) {
+  return (
+    <Switch>
+      <Match when={props.status === "Processing"}>
+        <TbDots />
+      </Match>
+      <Match when={props.status === "Compressing"}>
+        <FaSolidCircleNotch class="animate-spin" />
+      </Match>
+      <Match when={props.status === "Complete"}>
+        <FaSolidCheck />
+      </Match>
+      <Match when={props.status === "Error"}>
+        <FaSolidXmark />
+      </Match>
+    </Switch>
+  );
+}
+
+function ATable() {
   const [sorting, setSorting] = createSignal<SortingState>([]);
   const columns: ColumnDef<FileEntry>[] = [
     {
       accessorKey: "status",
+      cell: (props) => (
+        <StatusIcons status={props.getValue() as FileEntryStatus} />
+      ),
+      header: "S",
     },
     {
       accessorKey: "file",
@@ -30,6 +60,12 @@ export function Table() {
 
   const table = createSolidTable({
     get data() {
+      if (useTestData) {
+        // display files 50 times
+        return [...Array(50)].map(
+          () => files[Math.floor(Math.random() * files.length)],
+        );
+      }
       return store.files;
     },
     columns,
@@ -45,9 +81,9 @@ export function Table() {
   });
 
   return (
-    <div class="w-full grow">
+    <div class="w-full grow pb-10">
       <table class="w-full">
-        <thead class="sticky top-0 bg-[#1b1b1b] border-b-[1px] border-gray-700">
+        <thead class="sticky top-0 bg-[#1b1b1b] border-b-[1px] border-gray-700 z-40">
           <For each={table.getHeaderGroups()}>
             {(headerGroup) => (
               <tr>
@@ -55,6 +91,10 @@ export function Table() {
                   {(header) => (
                     <th
                       class="px-2 text-left capitalize"
+                      classList={{
+                        "w-20": ["size", "savings"].includes(header.column.id),
+                        "w-1": header.column.id === "status",
+                      }}
                       colSpan={header.colSpan}
                     >
                       <Show when={!header.isPlaceholder}>
@@ -62,15 +102,15 @@ export function Table() {
                           classList={{
                             "cursor-pointer select-none":
                               header.column.getCanSort(),
-                            grow: header.column.id === "file",
                           }}
+                          class="whitespace-nowrap"
                           onClick={header.column.getToggleSortingHandler()}
                           onKeyPress={() => {}}
                         >
                           {{
                             asc: "↑ ",
                             desc: "↓ ",
-                          }[header.column.getIsSorted() as string] ?? null}
+                          }[header.column.getIsSorted() as string] ?? "  "}
                           {flexRender(
                             header.column.columnDef.header,
                             header.getContext(),
@@ -84,7 +124,7 @@ export function Table() {
             )}
           </For>
         </thead>
-        <tbody>
+        <tbody class="overflow-clip max-h-svh">
           <For each={table.getRowModel().rows}>
             {(row) => (
               <tr class="even:bg-[#262626] hover:bg-gray-700 cursor-default">
@@ -107,4 +147,23 @@ export function Table() {
   );
 }
 
-export default Table;
+function PlaceHolder() {
+  return (
+    <div class="w-full grow flex items-center justify-center h-full pb-10">
+      <BsArrowDownSquare size={100} class="opacity-50" />
+    </div>
+  );
+}
+
+function TableOrPlaceholder() {
+  return (
+    <Show
+      when={store.files.length > 0 || useTestData}
+      fallback={<PlaceHolder />}
+    >
+      <ATable />
+    </Show>
+  );
+}
+
+export default TableOrPlaceholder;
