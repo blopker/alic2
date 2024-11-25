@@ -1,22 +1,40 @@
-import { For, Show, createSignal } from "solid-js";
+import { type Component, For, Show, createMemo, createSignal } from "solid-js";
 import "../App.css";
+import { Dynamic } from "solid-js/web";
 import type { ThemeKind } from "../bindings";
 import { ProfilePage } from "./ProfilePage";
-import { SettingBox, SettingRow, SettingsSelect } from "./SettingsUI";
-import { resetSettings, setTheme, settings } from "./settingsData";
+import {
+  SettingBox,
+  SettingRow,
+  SettingsInput,
+  SettingsModal,
+  SettingsSelect,
+} from "./SettingsUI";
+import {
+  createProfile,
+  resetSettings,
+  setTheme,
+  settings,
+} from "./settingsData";
 
 interface SettingsPageData {
   kind: string;
   title: string;
+  id?: number;
+  page?: Component;
 }
 
 const [settingsPages, _] = createSignal<SettingsPageData[]>([
-  { kind: "general", title: "General" },
+  { kind: "general", title: "General", page: GeneralPage },
 ]);
+
+const [showNewProfileModal, setShowNewProfileModal] = createSignal(false);
 
 const themeKinds: ThemeKind[] = ["System", "Light", "Dark"];
 
-const [activePage, setActivePage] = createSignal<string>("general");
+const [activePage, setActivePage] = createSignal<SettingsPageData>(
+  settingsPages()[0],
+);
 
 export function Settings() {
   return (
@@ -25,11 +43,16 @@ export function Settings() {
         <SettingsSideBar />
       </div>
       <div class="grow p-4 overflow-scroll">
-        <Show when={activePage() === "general"}>
-          <GeneralPage />
+        <Show when={activePage().page}>
+          <Dynamic component={activePage().page} />
         </Show>
-        <Show when={activePage().startsWith("profile:")}>
-          <ProfilePage name={activePage().split(":")[1]} />
+        <Show when={activePage().id !== undefined}>
+          <ProfilePage
+            id={activePage().id || 0}
+            onDelete={() => {
+              setActivePage(settingsPages()[0]);
+            }}
+          />
         </Show>
       </div>
     </main>
@@ -37,15 +60,59 @@ export function Settings() {
 }
 
 function SettingsSideBar() {
+  const [newProfileName, setNewProfileName] = createSignal("");
+  const profilePages = createMemo<SettingsPageData[]>(() => {
+    return settings.profiles.map((p) => ({
+      kind: `profile:${p.name}`,
+      title: p.name,
+      id: p.id,
+    }));
+  });
   return (
     <div class="flex flex-col items-start p-4 gap-2">
+      <Show when={showNewProfileModal()}>
+        <SettingsModal title="New Profile">
+          <div>Name</div>
+          <SettingsInput
+            label="Name"
+            value=""
+            class=""
+            onChange={async (value) => {
+              setNewProfileName(value);
+            }}
+          />
+          <div class="flex justify-between pt-6">
+            <button
+              onClick={async () => {
+                await createProfile(newProfileName());
+                const newProfile = settings.profiles.find(
+                  (p) => p.name === newProfileName(),
+                );
+                if (newProfile) {
+                  //get last profilepage
+                  const profi = profilePages().length - 1;
+                  setActivePage(profilePages()[profi]);
+                }
+                setNewProfileName("");
+                setShowNewProfileModal(false);
+              }}
+              type="button"
+            >
+              OK
+            </button>
+            <button type="button" onClick={() => setShowNewProfileModal(false)}>
+              Cancel
+            </button>
+          </div>
+        </SettingsModal>
+      </Show>
       <For each={settingsPages()}>
         {(p) => (
           <button
             classList={{
-              "font-bold": p.kind === activePage(),
+              "font-bold": p.kind === activePage().kind,
             }}
-            onClick={() => setActivePage(p.kind)}
+            onClick={() => setActivePage(p)}
             type="button"
           >
             {p.title}
@@ -53,20 +120,22 @@ function SettingsSideBar() {
         )}
       </For>
       <div class="text-sm pt-2">Profiles</div>
-      <For each={settings.profiles}>
+      <For each={profilePages()}>
         {(p) => (
           <button
             classList={{
-              "font-bold": `profile:${p.name}` === activePage(),
+              "font-bold": p.kind === activePage().kind,
             }}
-            onClick={() => setActivePage(`profile:${p.name}`)}
+            onClick={() => setActivePage(p)}
             type="button"
           >
-            {p.name}
+            {p.title}
           </button>
         )}
       </For>
-      <button type="button">New Profile...</button>
+      <button onClick={() => setShowNewProfileModal(true)} type="button">
+        New Profile...
+      </button>
     </div>
   );
 }

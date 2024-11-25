@@ -73,4 +73,40 @@ function SettingsSelect(props: {
   );
 }
 
-export { SettingBox, SettingRow, SettingsToggle, SettingsSelect };
+function SettingsModal(props: { title: string; children: JSXElement }) {
+  return (
+    <div class="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50 transition-all z-50">
+      <div class="bg-gray-900 rounded-xl p-4 w-full max-w-sm">
+        <div class="text-xl font-bold pb-4">{props.title}</div>
+        {props.children}
+      </div>
+    </div>
+  );
+}
+
+function SettingsInput(props: {
+  label: string;
+  value: string;
+  class: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <input
+      class={`${props.class} rounded-md border-0 py-1.5 shadow-sm sm:text-sm/6 bg-black`}
+      type="text"
+      value={props.value}
+      onInput={(e) => {
+        props.onChange(e.target.value);
+      }}
+    />
+  );
+}
+
+export {
+  SettingBox,
+  SettingRow,
+  SettingsToggle,
+  SettingsSelect,
+  SettingsModal,
+  SettingsInput,
+};

@@ -10,44 +10,47 @@ import { deleteProfile, settings, updateProfile } from "./settingsData";
 
 const imageTypes: ImageType[] = ["JPEG", "PNG", "WEBP", "GIF", "TIFF"];
 
-function ProfilePage(props: { name: string }) {
-  const data = settings.profiles.find((p) => p.name === props.name);
-  if (!data) {
-    return <div>Profile not found</div>;
-  }
+function ProfilePage(props: { id: number; onDelete: () => void }) {
+  const data = () => {
+    const d = settings.profiles.find((p) => p.id === props.id);
+    if (!d) {
+      throw new Error("Profile not found");
+    }
+    return d;
+  };
   return (
     <div>
-      <h1 class="text-left text-xl font-bold pb-4">{props.name}</h1>
+      <h1 class="text-left text-xl font-bold pb-4">{data().name}</h1>
       <SettingBox title="Quality">
         <SettingRow title="JPEG Quality">
           <QualitySlider
-            value={data.jpeg_quality}
+            value={data().jpeg_quality}
             onChange={(value) => {
-              updateProfile(data.id, { jpeg_quality: value });
+              updateProfile(data().id, { jpeg_quality: value });
             }}
           />
         </SettingRow>
         <SettingRow title="PNG Quality">
           <QualitySlider
-            value={data.png_quality}
+            value={data().png_quality}
             onChange={(value) => {
-              updateProfile(data.id, { png_quality: value });
+              updateProfile(data().id, { png_quality: value });
             }}
           />
         </SettingRow>
         <SettingRow title="WEBP Quality">
           <QualitySlider
-            value={data.webp_quality}
+            value={data().webp_quality}
             onChange={(value) => {
-              updateProfile(data.id, { webp_quality: value });
+              updateProfile(data().id, { webp_quality: value });
             }}
           />
         </SettingRow>
         <SettingRow title="GIF Quality">
           <QualitySlider
-            value={data.gif_quality}
+            value={data().gif_quality}
             onChange={(value) => {
-              updateProfile(data.id, { gif_quality: value });
+              updateProfile(data().id, { gif_quality: value });
             }}
           />
         </SettingRow>
@@ -56,9 +59,9 @@ function ProfilePage(props: { name: string }) {
       <SettingBox title="Resize">
         <SettingRow title="Resize">
           <SettingsToggle
-            value={data.should_resize}
+            value={data().should_resize}
             onChange={(value) => {
-              updateProfile(data.id, {
+              updateProfile(data().id, {
                 should_resize: value,
               });
             }}
@@ -66,9 +69,9 @@ function ProfilePage(props: { name: string }) {
         </SettingRow>
         <SettingRow title="Resize Width">
           <NumberInput
-            value={data.resize_width}
+            value={data().resize_width}
             onChange={(value) => {
-              updateProfile(data.id, {
+              updateProfile(data().id, {
                 resize_width: value,
               });
             }}
@@ -77,9 +80,9 @@ function ProfilePage(props: { name: string }) {
         </SettingRow>
         <SettingRow title="Resize Height">
           <NumberInput
-            value={data.resize_height}
+            value={data().resize_height}
             onChange={(value) => {
-              updateProfile(data.id, {
+              updateProfile(data().id, {
                 resize_height: value,
               });
             }}
@@ -91,9 +94,9 @@ function ProfilePage(props: { name: string }) {
       <SettingBox title="Output">
         <SettingRow title="Overwrite">
           <SettingsToggle
-            value={data.should_overwrite}
+            value={data().should_overwrite}
             onChange={(value) => {
-              updateProfile(data.id, {
+              updateProfile(data().id, {
                 should_overwrite: value,
               });
             }}
@@ -103,9 +106,9 @@ function ProfilePage(props: { name: string }) {
           <input
             class="w-20 rounded-md border-0 py-1.5 shadow-sm sm:text-sm/6 bg-black"
             type="text"
-            value={data.postfix}
+            value={data().postfix}
             onInput={(e) => {
-              updateProfile(data.id, {
+              updateProfile(data().id, {
                 postfix: e.target.value,
               });
             }}
@@ -113,9 +116,9 @@ function ProfilePage(props: { name: string }) {
         </SettingRow>
         <SettingRow title="Convert Image">
           <SettingsToggle
-            value={data.should_convert}
+            value={data().should_convert}
             onChange={(value) => {
-              updateProfile(data.id, {
+              updateProfile(data().id, {
                 should_convert: value,
               });
             }}
@@ -124,9 +127,9 @@ function ProfilePage(props: { name: string }) {
         <SettingRow title="Convert Extension">
           <SettingsSelect
             class="w-32"
-            value={data.convert_extension}
+            value={data().convert_extension}
             onChange={(type) =>
-              updateProfile(data.id, { convert_extension: type as ImageType })
+              updateProfile(data().id, { convert_extension: type as ImageType })
             }
             options={imageTypes}
           />
@@ -137,7 +140,7 @@ function ProfilePage(props: { name: string }) {
         <SettingRow title="Reset">
           <button
             onClick={() => {
-              updateProfile(data.id, {
+              updateProfile(data().id, {
                 should_resize: false,
                 should_convert: false,
                 should_overwrite: false,
@@ -158,9 +161,10 @@ function ProfilePage(props: { name: string }) {
         </SettingRow>
         <SettingRow title="Delete">
           <button
-            disabled={data.id === 0}
+            disabled={data().id === 0}
             onClick={() => {
-              deleteProfile(data.id);
+              deleteProfile(data().id);
+              props.onDelete();
             }}
             type="button"
             class="bg-red-500 hover:bg-red-700 text-white font-bold px-4 rounded disabled:opacity-50 disabled:hover:bg-red-500"

@@ -61,4 +61,16 @@ async function deleteProfile(profileid: number) {
   setSettings(await getSettings());
 }
 
-export { settings, setTheme, resetSettings, updateProfile, deleteProfile };
+async function createProfile(name: string) {
+  commands.addProfile(name);
+  setSettings(await getSettings());
+}
+
+export {
+  settings,
+  setTheme,
+  resetSettings,
+  updateProfile,
+  deleteProfile,
+  createProfile,
+};
