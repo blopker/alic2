@@ -1,4 +1,4 @@
-import { createStore, produce } from "solid-js/store";
+import { createStore } from "solid-js/store";
 import { type ProfileData, type SettingsData, commands } from "../bindings";
 
 const [settings, setSettings] = createStore<SettingsData>(await getSettings());
@@ -56,4 +56,9 @@ function updateProfile(profileid: number, update: Partial<ProfileData>) {
   debounceSaveSettings();
 }
 
-export { settings, setTheme, resetSettings, updateProfile };
+async function deleteProfile(profileid: number) {
+  commands.deleteProfile(profileid);
+  setSettings(await getSettings());
+}
+
+export { settings, setTheme, resetSettings, updateProfile, deleteProfile };

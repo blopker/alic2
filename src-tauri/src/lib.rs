@@ -8,11 +8,6 @@ use tauri::{
 use tauri_plugin_store::StoreExt;
 use tauri_specta::{collect_commands, Builder};
 
-// #[tauri::command]
-// fn greet(name: &str) -> String {
-//     format!("Hello, {}? You've been greeted from Rust??!", name)
-// }
-
 #[tauri::command]
 #[specta::specta]
 async fn open_settings_window(app: tauri::AppHandle) {
@@ -36,28 +31,19 @@ async fn open_settings_window(app: tauri::AppHandle) {
     }
 }
 
-// #[tauri::command]
-// #[specta::specta]
-// async fn get_setting(app: tauri::AppHandle, setting: String) -> Result<String, String> {
-//     let store = app
-//         .store("settings.json")
-//         .expect("Failed to get value from store");
-//     let value = store.get(&setting).expect("Failed to get value from store");
-//     Ok(value.to_string())
-// }
-
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let builder = Builder::<tauri::Wry>::new()
-        // Then register them (separated by a comma)
-        .commands(collect_commands![
-            open_settings_window,
-            compress::process_img,
-            compress::get_file_info,
-            settings::get_settings,
-            settings::save_settings,
-            settings::reset_settings
-        ]);
+    let builder = Builder::<tauri::Wry>::new().commands(collect_commands![
+        open_settings_window,
+        compress::process_img,
+        compress::get_file_info,
+        settings::get_settings,
+        settings::save_settings,
+        settings::reset_settings,
+        settings::reset_profile,
+        settings::delete_profile,
+        settings::add_profile,
+    ]);
 
     #[cfg(debug_assertions)] // <- Only export on non-release builds
     builder

@@ -1,12 +1,9 @@
-import { For, type JSXElement, Show, createSignal } from "solid-js";
+import { For, Show, createSignal } from "solid-js";
 import "../App.css";
 import type { ThemeKind } from "../bindings";
-import {
-  resetSettings,
-  setTheme,
-  settings,
-  updateProfile,
-} from "./settingsData";
+import { ProfilePage } from "./ProfilePage";
+import { SettingBox, SettingRow, SettingsSelect } from "./SettingsUI";
+import { resetSettings, setTheme, settings } from "./settingsData";
 
 interface SettingsPageData {
   kind: string;
@@ -74,46 +71,18 @@ function SettingsSideBar() {
   );
 }
 
-function SettingBox(props: { title: string; children: JSXElement }) {
-  return (
-    <div>
-      <div>{props.title}</div>
-      <div class="border-2 rounded-xl border-gray-700 p-4 gap-2">
-        <div>{props.children}</div>
-      </div>
-    </div>
-  );
-}
-
-function SettingRow(props: { title: string; children: JSXElement }) {
-  return (
-    <div class="flex gap-2 justify-between">
-      <div>{props.title}</div>
-      <div>{props.children}</div>
-    </div>
-  );
-}
-
 function GeneralPage() {
   return (
     <div>
       <h1 class="text-left text-xl font-bold pb-4">General</h1>
       <SettingBox title="Interface">
         <SettingRow title="Theme">
-          <select
-            onChange={(e) => {
-              setTheme(e.target.value as ThemeKind);
-            }}
-            name="theme"
-            id="theme"
-            class="w-40 mt-2 block rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm/6"
-          >
-            <For each={themeKinds}>
-              {(kind) => (
-                <option selected={kind === settings.theme}>{kind}</option>
-              )}
-            </For>
-          </select>
+          <SettingsSelect
+            class="w-40"
+            value={settings.theme}
+            onChange={(theme) => setTheme(theme as ThemeKind)}
+            options={themeKinds}
+          />
         </SettingRow>
       </SettingBox>
       <div class="pt-8" />
@@ -128,106 +97,6 @@ function GeneralPage() {
           </button>
         </SettingRow>
       </SettingBox>
-    </div>
-  );
-}
-
-function ProfilePage(props: { name: string }) {
-  const data = settings.profiles.find((p) => p.name === props.name);
-  if (!data) {
-    return <div>Profile not found</div>;
-  }
-  return (
-    <div>
-      <h1 class="text-left text-xl font-bold pb-4">{props.name}</h1>
-      <SettingBox title="Quality">
-        <SettingRow title="JPEG Quality">
-          <QualitySlider
-            value={data.jpeg_quality}
-            onChange={(value) => {
-              updateProfile(data.id, { jpeg_quality: value });
-            }}
-          />
-        </SettingRow>
-        <SettingRow title="PNG Quality">
-          <QualitySlider
-            value={data.png_quality}
-            onChange={(value) => {
-              updateProfile(data.id, { png_quality: value });
-            }}
-          />
-        </SettingRow>
-        <SettingRow title="WEBP Quality">
-          <QualitySlider
-            value={data.webp_quality}
-            onChange={(value) => {
-              updateProfile(data.id, { webp_quality: value });
-            }}
-          />
-        </SettingRow>
-        <SettingRow title="GIF Quality">
-          <QualitySlider
-            value={data.gif_quality}
-            onChange={(value) => {
-              updateProfile(data.id, { gif_quality: value });
-            }}
-          />
-        </SettingRow>
-      </SettingBox>
-      <div class="pt-8" />
-      <SettingBox title="Resize">
-        <SettingRow title="Resize Width">
-          <input
-            class="mr-2 bg-black"
-            type="text"
-            min="1"
-            value={data.resize_width}
-            onInput={(e) => {
-              const value = Number.parseInt(e.target.value);
-              if (Number.isNaN(value)) {
-                return;
-              }
-              updateProfile(data.id, {
-                resize_width: value,
-              });
-            }}
-          />
-          px
-        </SettingRow>
-        <SettingRow title="Resize Height">
-          <input
-            type="range"
-            min="1"
-            max="1000"
-            value={data.resize_height}
-            onInput={(e) => {
-              updateProfile(data.id, {
-                resize_height: Number.parseInt(e.target.value),
-              });
-            }}
-          />
-        </SettingRow>
-      </SettingBox>
-    </div>
-  );
-}
-
-function QualitySlider(props: {
-  value: number;
-  onChange: (value: number) => void;
-}) {
-  return (
-    <div class="flex gap-4">
-      <input
-        type="range"
-        min="1"
-        max="100"
-        value={props.value}
-        onInput={(e) => {
-          props.onChange(Number.parseInt(e.target.value));
-        }}
-      />
-      <div>{props.value}</div>
     </div>
   );
 }
