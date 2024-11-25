@@ -124,7 +124,7 @@ function ATable() {
             )}
           </For>
         </thead>
-        <tbody class="overflow-clip max-h-svh">
+        <tbody class="text-clip max-h-svh">
           <For each={table.getRowModel().rows}>
             {(row) => (
               <tr class="even:bg-[#262626] hover:bg-gray-700 cursor-default">

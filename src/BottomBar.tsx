@@ -60,7 +60,7 @@ function SettingsButton() {
     <button
       onClick={settingsWindow}
       type="button"
-      class="relative text-center rounded hover:gray-600 transition-all p-2"
+      class="relative text-center rounded-sm hover:gray-600 transition-all p-2"
     >
       <VsSettings />
     </button>
@@ -77,7 +77,7 @@ function Button(props: {
       type="button"
       onClick={props.onClick}
       disabled={props.disabled}
-      class="relative text-center border-[0.5px] border-gray-800 rounded min-h-6 min-w-10 enabled:hover:bg-gray-600 p-0 m-0 leading-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+      class="relative text-center border-[0.5px] border-gray-800 rounded-sm min-h-6 min-w-10 enabled:hover:bg-gray-600 p-0 m-0 leading-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
     >
       {props.children}
     </button>

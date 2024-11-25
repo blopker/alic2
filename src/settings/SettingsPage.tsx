@@ -106,7 +106,7 @@ function GeneralPage() {
             }}
             name="theme"
             id="theme"
-            class="w-40 bg-black"
+            class="w-40 mt-2 block rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm/6"
           >
             <For each={themeKinds}>
               {(kind) => (
@@ -122,7 +122,7 @@ function GeneralPage() {
           <button
             onClick={resetSettings}
             type="button"
-            class="bg-red-500 hover:bg-red-700 text-white font-bold px-4 rounded"
+            class="bg-red-500 hover:bg-red-700 text-white font-bold px-4 rounded-sm"
           >
             Reset
           </button>
