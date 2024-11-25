@@ -1,7 +1,12 @@
 import { For, type JSXElement, Show, createSignal } from "solid-js";
 import "../App.css";
 import type { ThemeKind } from "../bindings";
-import { resetSettings, setTheme, settings } from "./settingsData";
+import {
+  resetSettings,
+  setTheme,
+  settings,
+  updateProfile,
+} from "./settingsData";
 
 interface SettingsPageData {
   kind: string;
@@ -22,7 +27,7 @@ export function Settings() {
       <div class="w-40 border-r-[1px] border-black">
         <SettingsSideBar />
       </div>
-      <div class="grow p-4">
+      <div class="grow p-4 overflow-scroll">
         <Show when={activePage() === "general"}>
           <GeneralPage />
         </Show>
@@ -137,50 +142,92 @@ function ProfilePage(props: { name: string }) {
       <h1 class="text-left text-xl font-bold pb-4">{props.name}</h1>
       <SettingBox title="Quality">
         <SettingRow title="JPEG Quality">
-          <input
-            type="range"
-            min="1"
-            max="100"
+          <QualitySlider
             value={data.jpeg_quality}
-            onInput={(e) => {
-              data.jpeg_quality = Number.parseInt(e.target.value);
+            onChange={(value) => {
+              updateProfile(data.id, { jpeg_quality: value });
             }}
           />
         </SettingRow>
         <SettingRow title="PNG Quality">
-          <input
-            type="range"
-            min="1"
-            max="100"
+          <QualitySlider
             value={data.png_quality}
-            onInput={(e) => {
-              data.png_quality = Number.parseInt(e.target.value);
+            onChange={(value) => {
+              updateProfile(data.id, { png_quality: value });
             }}
           />
         </SettingRow>
         <SettingRow title="WEBP Quality">
-          <input
-            type="range"
-            min="1"
-            max="100"
+          <QualitySlider
             value={data.webp_quality}
-            onInput={(e) => {
-              data.webp_quality = Number.parseInt(e.target.value);
+            onChange={(value) => {
+              updateProfile(data.id, { webp_quality: value });
             }}
           />
         </SettingRow>
         <SettingRow title="GIF Quality">
-          <input
-            type="range"
-            min="1"
-            max="100"
+          <QualitySlider
             value={data.gif_quality}
-            onInput={(e) => {
-              data.gif_quality = Number.parseInt(e.target.value);
+            onChange={(value) => {
+              updateProfile(data.id, { gif_quality: value });
             }}
           />
         </SettingRow>
       </SettingBox>
+      <div class="pt-8" />
+      <SettingBox title="Resize">
+        <SettingRow title="Resize Width">
+          <input
+            class="mr-2 bg-black"
+            type="text"
+            min="1"
+            value={data.resize_width}
+            onInput={(e) => {
+              const value = Number.parseInt(e.target.value);
+              if (Number.isNaN(value)) {
+                return;
+              }
+              updateProfile(data.id, {
+                resize_width: value,
+              });
+            }}
+          />
+          px
+        </SettingRow>
+        <SettingRow title="Resize Height">
+          <input
+            type="range"
+            min="1"
+            max="1000"
+            value={data.resize_height}
+            onInput={(e) => {
+              updateProfile(data.id, {
+                resize_height: Number.parseInt(e.target.value),
+              });
+            }}
+          />
+        </SettingRow>
+      </SettingBox>
+    </div>
+  );
+}
+
+function QualitySlider(props: {
+  value: number;
+  onChange: (value: number) => void;
+}) {
+  return (
+    <div class="flex gap-4">
+      <input
+        type="range"
+        min="1"
+        max="100"
+        value={props.value}
+        onInput={(e) => {
+          props.onChange(Number.parseInt(e.target.value));
+        }}
+      />
+      <div>{props.value}</div>
     </div>
   );
 }
