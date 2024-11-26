@@ -8,9 +8,9 @@ export const commands = {
 async openSettingsWindow() : Promise<void> {
     await TAURI_INVOKE("open_settings_window");
 },
-async processImg(parameters: Parameters) : Promise<Result<CompressResult, string>> {
+async processImg(parameters: ProfileData, path: string) : Promise<Result<CompressResult, string>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("process_img", { parameters }) };
+    return { status: "ok", data: await TAURI_INVOKE("process_img", { parameters, path }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
@@ -88,8 +88,7 @@ export type CompressResult = { path: string; out_path: string; result: string }
 export type FileEntry = { path: string; file: string | null; status: FileEntryStatus; size: number | null; savings: number | null; ext: string | null; error: string | null }
 export type FileEntryStatus = "Processing" | "Compressing" | "Complete" | "Error"
 export type ImageType = "JPEG" | "PNG" | "WEBP" | "GIF" | "TIFF"
-export type Parameters = { postfix: string; path: string; jpeg_quality: number; png_quality: number; webp_quality: number; gif_quality: number; resize: boolean; resize_width: number; resize_height: number; convert_extension: ImageType | null }
-export type ProfileData = { name: string; id: number; should_resize: boolean; should_convert: boolean; should_overwrite: boolean; convert_extension: ImageType; postfix: string; resize_width: number; resize_height: number; jpeg_quality: number; png_quality: number; webp_quality: number; gif_quality: number }
+export type ProfileData = { name: string; id: number; active: boolean; should_resize: boolean; should_convert: boolean; should_overwrite: boolean; convert_extension: ImageType; postfix: string; resize_width: number; resize_height: number; jpeg_quality: number; png_quality: number; webp_quality: number; gif_quality: number }
 export type SettingsData = { version: number; theme: ThemeKind; profiles: ProfileData[] }
 export type ThemeKind = "Light" | "Dark" | "System"
 

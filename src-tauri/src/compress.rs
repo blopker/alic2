@@ -8,6 +8,8 @@ use image::DynamicImage;
 use serde;
 use specta::Type;
 
+use crate::settings::ProfileData;
+
 #[derive(Debug, Eq, PartialEq, Clone, serde::Serialize, serde::Deserialize, Type)]
 pub struct FileEntry {
     pub path: String,
@@ -67,25 +69,25 @@ pub async fn get_file_info(mut file: FileEntry) -> Result<FileEntry, String> {
 
 #[tauri::command]
 #[specta::specta]
-pub async fn process_img(parameters: Parameters) -> Result<CompressResult, String> {
-    let img = read_image(&parameters.path)?;
-    let original_image_type = guess_image_type(&parameters.path)?;
-    let new_image_type = parameters.convert_extension.unwrap_or(original_image_type);
-    let out_path = get_out_path(&parameters, new_image_type);
+pub async fn process_img(parameters: ProfileData, path: String) -> Result<CompressResult, String> {
+    let img = read_image(&path)?;
+    let original_image_type = guess_image_type(&path)?;
+    let out_path = get_out_path(&parameters, original_image_type, &path);
 
     let csparams = create_csparameters(&parameters, img.width(), img.height());
     drop(img);
 
-    let should_convert = new_image_type != original_image_type;
+    let should_convert =
+        parameters.should_convert && parameters.convert_extension != original_image_type;
 
     let result = if should_convert {
-        convert_image(&parameters.path, &out_path, csparams, new_image_type)?
+        convert_image(&path, &out_path, csparams, parameters.convert_extension)?
     } else {
-        compress_image(&parameters.path, &out_path, csparams)?
+        compress_image(&path, &out_path, csparams)?
     };
 
     Ok(CompressResult {
-        path: parameters.path,
+        path,
         out_path,
         result,
     })
@@ -118,9 +120,13 @@ fn guess_image_type(path: &str) -> Result<ImageType, String> {
     }
 }
 
-fn get_out_path(parameters: &Parameters, image_type: ImageType) -> String {
-    let extension = parameters.convert_extension.unwrap_or(image_type);
-    let path = Path::new(&parameters.path);
+fn get_out_path(parameters: &ProfileData, image_type: ImageType, path: &str) -> String {
+    let extension = if parameters.should_convert {
+        parameters.convert_extension
+    } else {
+        image_type
+    };
+    let path = Path::new(&path);
     let original_extension = path.extension().unwrap_or_default();
     format!(
         "{}{}.{}",
@@ -146,13 +152,13 @@ fn convert_image_type(original_extension: &OsStr, image_type: ImageType) -> Stri
     }
 }
 
-fn create_csparameters(parameters: &Parameters, width: u32, height: u32) -> CSParameters {
+fn create_csparameters(parameters: &ProfileData, width: u32, height: u32) -> CSParameters {
     let mut new_height = 0;
     let mut new_width = 0;
 
     // set the largest dimension to the resize value,
     // only if the image size is larger than the resize value
-    if parameters.resize {
+    if parameters.should_resize {
         if width > parameters.resize_width || height > parameters.resize_height {
             if width > height {
                 new_width = parameters.resize_width;
@@ -240,20 +246,9 @@ mod tests {
 
     #[test]
     fn test_get_out_path() {
-        let parameters = Parameters {
-            path: "test/test.png".to_string(),
-            postfix: ".min".to_string(),
-            resize: true,
-            resize_width: 1000,
-            resize_height: 1000,
-            jpeg_quality: 80,
-            png_quality: 80,
-            webp_quality: 80,
-            gif_quality: 80,
-            convert_extension: None,
-        };
+        let parameters = ProfileData::new();
         let image_type = ImageType::PNG;
-        let result = get_out_path(&parameters, image_type);
+        let result = get_out_path(&parameters, image_type, &"data.png".to_string());
         assert_eq!(result, "test/test.min.png".to_string());
     }
 

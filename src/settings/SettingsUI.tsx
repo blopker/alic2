@@ -54,7 +54,7 @@ function SettingsSelect(props: {
   value: string;
   onChange: (value: string) => void;
   options: string[];
-  class: string;
+  class?: string;
 }) {
   return (
     <select

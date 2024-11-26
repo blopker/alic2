@@ -1,5 +1,7 @@
 import { createStore } from "solid-js/store";
 import { type FileEntry, commands } from "./bindings";
+import { compressImage } from "./compress";
+import { getProfileActive } from "./settings/settingsData";
 
 interface Store {
   files: FileEntry[];
@@ -14,6 +16,9 @@ const [store, setStore] = createStore<Store>({
 });
 
 async function addFile(path: string) {
+  if (store.files.find((f) => f.path === path)) {
+    return;
+  }
   const filename = path.split("/").pop() ?? "";
   const ext = filename.split(".").pop() ?? "";
   const file: FileEntry = {
@@ -37,18 +42,7 @@ async function addFile(path: string) {
   const f = fileResult.data;
   f.status = "Compressing";
   updateFile(f);
-  await commands.processImg({
-    postfix: ".min",
-    path: fileResult.data.path,
-    jpeg_quality: 85,
-    png_quality: 85,
-    webp_quality: 85,
-    gif_quality: 85,
-    resize_width: 1000,
-    resize_height: 1000,
-    resize: false,
-    convert_extension: null,
-  });
+  await compressImage(getProfileActive(), fileResult.data);
   f.status = "Complete";
   updateFile(f);
 }

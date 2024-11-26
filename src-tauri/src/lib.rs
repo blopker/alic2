@@ -1,6 +1,5 @@
 mod compress;
 mod settings;
-use specta_typescript;
 use tauri::{
     menu::{Menu, MenuItem, PredefinedMenuItem, Submenu},
     Manager,

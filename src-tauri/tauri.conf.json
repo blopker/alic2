@@ -19,7 +19,8 @@
         "minHeight": 370,
         "resizable": true,
         "fullscreen": false,
-        "center": true
+        "center": true,
+        "acceptFirstMouse": true
       },
       {
         "title": "Settings",
@@ -33,7 +34,8 @@
         "center": true,
         "create": false,
         "dragDropEnabled": false,
-        "url": "settings.html"
+        "url": "index.html?window=settings",
+        "acceptFirstMouse": true
       }
     ],
     "security": {
@@ -49,6 +51,9 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "macOS": {
+      "minimumSystemVersion": "13"
+    }
   }
 }

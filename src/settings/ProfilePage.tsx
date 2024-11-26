@@ -124,7 +124,7 @@ function ProfilePage(props: { id: number; onDelete: () => void }) {
             }}
           />
         </SettingRow>
-        <SettingRow title="Convert Extension">
+        <SettingRow title="Convert Format">
           <SettingsSelect
             class="w-32"
             value={data().convert_extension}

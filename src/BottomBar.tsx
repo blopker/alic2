@@ -4,6 +4,12 @@ import { FaSolidXmark } from "solid-icons/fa";
 import { VsSettings } from "solid-icons/vs";
 import type { JSXElement } from "solid-js";
 import { commands } from "./bindings";
+import { SettingsSelect } from "./settings/SettingsUI";
+import {
+  getProfileActive,
+  setProfileActive,
+  settings,
+} from "./settings/settingsData";
 import { addFile, clearFiles, store } from "./store";
 
 export default function BottomBar() {
@@ -11,6 +17,17 @@ export default function BottomBar() {
     <div class="fixed bottom-0 left-0 right-0 flex items-center justify-between bg-[#403F3F] h-10 px-2 shadow-2xl">
       <AddButton />
       <span class="grow" />
+      <SettingsSelect
+        value={getProfileActive().name}
+        class="mr-2 w-40"
+        onChange={(value) => {
+          const profile = settings.profiles.find((p) => p.name === value);
+          if (profile) {
+            setProfileActive(profile.id);
+          }
+        }}
+        options={settings.profiles.map((p) => p.name)}
+      />
       <SettingsButton />
       <ClearButton />
     </div>

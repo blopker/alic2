@@ -1,7 +1,13 @@
+import { listen } from "@tauri-apps/api/event";
 import { createStore } from "solid-js/store";
 import { type ProfileData, type SettingsData, commands } from "../bindings";
 
 const [settings, setSettings] = createStore<SettingsData>(await getSettings());
+
+listen<boolean>("settings-changed", async (_) => {
+  console.log("settings changed");
+  setSettings(await getSettings());
+});
 
 function debounce<F extends (...args: Parameters<F>) => ReturnType<F>>(
   func: F,
@@ -26,14 +32,13 @@ async function getSettings() {
 
 async function resetSettings() {
   await commands.resetSettings();
-  setSettings(await getSettings());
 }
 
 async function saveSettings() {
   await commands.saveSettings(settings);
 }
 
-const debounceSaveSettings = debounce(saveSettings, 1000);
+const debounceSaveSettings = debounce(saveSettings, 500);
 
 function setTheme(theme: SettingsData["theme"]) {
   setSettings("theme", theme);
@@ -58,12 +63,30 @@ function updateProfile(profileid: number, update: Partial<ProfileData>) {
 
 async function deleteProfile(profileid: number) {
   commands.deleteProfile(profileid);
-  setSettings(await getSettings());
 }
 
 async function createProfile(name: string) {
-  commands.addProfile(name);
+  await commands.addProfile(name);
   setSettings(await getSettings());
+}
+
+async function setProfileActive(profileid: number) {
+  let found = false;
+  for (const profile of settings.profiles) {
+    if (profile.id === profileid) {
+      updateProfile(profileid, { active: true });
+      found = true;
+    } else {
+      updateProfile(profile.id, { active: false });
+    }
+  }
+  if (!found) {
+    updateProfile(0, { active: true });
+  }
+}
+
+function getProfileActive() {
+  return settings.profiles.find((p) => p.active) || settings.profiles[0];
 }
 
 export {
@@ -73,4 +96,6 @@ export {
   updateProfile,
   deleteProfile,
   createProfile,
+  setProfileActive,
+  getProfileActive,
 };

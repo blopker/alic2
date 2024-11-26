@@ -1,6 +1,7 @@
 use serde::{self};
 use serde_json::json;
 use specta::Type;
+use tauri::Emitter;
 use tauri_plugin_store::StoreExt;
 
 use crate::compress::ImageType;
@@ -35,6 +36,7 @@ impl SettingsData {
 pub struct ProfileData {
     pub name: String,
     pub id: u32,
+    pub active: bool,
     pub should_resize: bool,
     pub should_convert: bool,
     pub should_overwrite: bool,
@@ -53,6 +55,7 @@ impl ProfileData {
         Self {
             name: "Default".to_string(),
             id: 0,
+            active: true,
             should_resize: false,
             should_convert: false,
             should_overwrite: false,
@@ -71,6 +74,7 @@ impl ProfileData {
         let mut this = Self::new();
         this.id = id;
         this.name = name;
+        this.active = false;
         this
     }
 }
@@ -109,6 +113,7 @@ pub async fn save_settings(app: tauri::AppHandle, settings: SettingsData) -> Res
         .expect("Failed to get settings from store");
     store.set("settings", serde_json::to_value(settings.clone()).unwrap());
     println!("Set settings: {:?}", settings);
+    app.emit("settings-changed", true).unwrap();
     Ok(())
 }
 
@@ -119,6 +124,7 @@ pub async fn reset_settings(app: tauri::AppHandle) -> Result<(), String> {
         .store("settings.json")
         .expect("Failed to get settings from store");
     store.set(SETTINGS_KEY, json!(SettingsData::new()));
+    app.emit("settings-changed", true).unwrap();
     Ok(())
 }
 
@@ -142,6 +148,7 @@ pub async fn reset_profile(app: tauri::AppHandle, profile_id: u32) -> Result<(),
     let profile = settings.profiles[profile_idx.unwrap()].clone();
     settings.profiles[profile_idx.unwrap()] = ProfileData::new_params(profile_id, profile.name);
     store.set(SETTINGS_KEY, json!(settings));
+    app.emit("settings-changed", true).unwrap();
     Ok(())
 }
 
@@ -167,6 +174,7 @@ pub async fn delete_profile(app: tauri::AppHandle, profile_id: u32) -> Result<()
     }
     settings.profiles.remove(profile_idx.unwrap());
     store.set(SETTINGS_KEY, json!(settings));
+    app.emit("settings-changed", true).unwrap();
     Ok(())
 }
 
@@ -192,5 +200,6 @@ pub async fn add_profile(app: tauri::AppHandle, mut name: String) -> Result<(), 
         .profiles
         .push(ProfileData::new_params(highest_id + 1, name));
     store.set(SETTINGS_KEY, json!(settings));
+    app.emit("settings-changed", true).unwrap();
     Ok(())
 }
