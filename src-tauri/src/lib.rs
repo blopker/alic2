@@ -1,9 +1,7 @@
 mod compress;
+mod files;
 mod settings;
-use tauri::{
-    menu::{Menu, MenuItem, PredefinedMenuItem, Submenu},
-    Manager,
-};
+use tauri::Manager;
 use tauri_plugin_store::StoreExt;
 use tauri_specta::{collect_commands, Builder};
 
@@ -42,6 +40,7 @@ pub fn run() {
         settings::reset_profile,
         settings::delete_profile,
         settings::add_profile,
+        files::open_finder_at_path,
     ]);
 
     #[cfg(debug_assertions)] // <- Only export on non-release builds
@@ -52,36 +51,38 @@ pub fn run() {
         )
         .expect("Failed to export typescript bindings");
     tauri::Builder::default()
+        .plugin(tauri_plugin_single_instance::init(|app, args, cwd| {
+            //print everything to the console
+            println!("Second instance detected:");
+            println!("Args: {:?}", args);
+            println!("CWD: {:?}", cwd);
+            println!("App: {:?}", app);
+        }))
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_store::Builder::default().build())
-        .menu(|handle| {
-            Menu::with_items(
-                handle,
-                &[&Submenu::with_items(
-                    handle,
-                    "File",
-                    true,
-                    &[
-                        &PredefinedMenuItem::close_window(handle, None)?,
-                        #[cfg(target_os = "macos")]
-                        &MenuItem::new(handle, "H&ello", true, None::<&str>)?,
-                    ],
-                )?],
-            )
-        })
+        // .menu(|handle| {
+        //     Menu::with_items(
+        //         handle,
+        //         &[&Submenu::with_items(
+        //             handle,
+        //             "File",
+        //             true,
+        //             &[
+        //                 &PredefinedMenuItem::close_window(handle, None)?,
+        //                 #[cfg(target_os = "macos")]
+        //                 &MenuItem::new(handle, "H&ello", true, None::<&str>)?,
+        //             ],
+        //         )?],
+        //     )
+        // })
         .invoke_handler(builder.invoke_handler())
         .setup(move |app| {
             // This is also required if you want to use events
             builder.mount_events(app);
-
             // Store setup
-            let store = app.store("settings.json")?;
-
-            // Note that values must be serde_json::Value instances,
-            store.set("some-key", 5);
-
+            app.store("settings.json")?;
             Ok(())
         })
         .run(tauri::generate_context!())

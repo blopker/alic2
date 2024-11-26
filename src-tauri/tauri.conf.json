@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "tauri-app",
+  "productName": "Alic Image Compressor",
   "version": "0.1.0",
-  "identifier": "io.kbl.tauri",
+  "identifier": "io.kbl.alic",
   "build": {
     "beforeDevCommand": "bun run dev",
     "devUrl": "http://localhost:1420",
@@ -12,30 +12,29 @@
   "app": {
     "windows": [
       {
-        "title": "tauri-app",
-        "width": 600,
-        "height": 370,
-        "minWidth": 600,
-        "minHeight": 370,
-        "resizable": true,
-        "fullscreen": false,
+        "acceptFirstMouse": true,
         "center": true,
-        "acceptFirstMouse": true
+        "fullscreen": false,
+        "height": 370,
+        "minHeight": 370,
+        "minWidth": 600,
+        "resizable": true,
+        "title": "Alic Image Compressor",
+        "width": 600
       },
       {
-        "title": "Settings",
-        "label": "settings",
-        "width": 600,
-        "height": 370,
-        "minWidth": 600,
-        "minHeight": 370,
-        "resizable": true,
-        "fullscreen": false,
-        "center": true,
+        "acceptFirstMouse": true,
         "create": false,
         "dragDropEnabled": false,
+        "fullscreen": false,
+        "height": 370,
+        "label": "settings",
+        "minHeight": 370,
+        "minWidth": 600,
+        "resizable": true,
+        "title": "Alic Settings",
         "url": "index.html?window=settings",
-        "acceptFirstMouse": true
+        "width": 600
       }
     ],
     "security": {

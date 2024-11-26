@@ -13,6 +13,7 @@ import { TbDots } from "solid-icons/tb";
 import { For, Match, Switch } from "solid-js";
 import { Show, createSignal } from "solid-js";
 import type { FileEntry, FileEntryStatus } from "./bindings";
+import { commands } from "./bindings";
 import { store } from "./store";
 import { files } from "./testdata";
 
@@ -81,7 +82,7 @@ function ATable() {
   });
 
   return (
-    <div class="w-full grow pb-10">
+    <div class="w-full grow pb-10 select-none">
       <table class="w-full">
         <thead class="sticky top-0 bg-[#1b1b1b] border-b-[1px] border-gray-700 z-40">
           <For each={table.getHeaderGroups()}>
@@ -127,7 +128,12 @@ function ATable() {
         <tbody class="text-clip max-h-svh">
           <For each={table.getRowModel().rows}>
             {(row) => (
-              <tr class="even:bg-[#262626] hover:bg-gray-700 cursor-default">
+              <tr
+                onDblClick={() => {
+                  console.log(commands.openFinderAtPath(row.original.path));
+                }}
+                class="even:bg-[#262626] hover:bg-gray-700 cursor-default"
+              >
                 <For each={row.getVisibleCells()}>
                   {(cell) => (
                     <td class="px-2">
