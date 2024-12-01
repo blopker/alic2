@@ -9,6 +9,8 @@ interface Store {
   tripleCount: number;
 }
 
+type ReadonlyFileEntry = Readonly<FileEntry>;
+
 const [store, setStore] = createStore<Store>({
   files: [],
   doubleCount: 0,
@@ -19,7 +21,7 @@ async function addFile(path: string) {
   if (store.files.find((f) => f.path === path)) {
     return;
   }
-  const file: FileEntry = {
+  const file: ReadonlyFileEntry = {
     path,
     file: "",
     status: "Processing",
@@ -50,7 +52,8 @@ async function addFile(path: string) {
 }
 
 function updateFile(file: FileEntry, update: Partial<FileEntry>) {
-  setStore("files", (f) => f.path === file.path, { ...file, ...update });
+  const newFile: ReadonlyFileEntry = { ...file, ...update };
+  setStore("files", (f) => f.path === file.path, newFile);
   // hack to make the table update
   setStore("files", [...store.files]);
 }
