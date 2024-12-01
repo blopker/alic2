@@ -8,17 +8,17 @@ export const commands = {
 async openSettingsWindow() : Promise<void> {
     await TAURI_INVOKE("open_settings_window");
 },
-async processImg(parameters: ProfileData, path: string) : Promise<Result<CompressResult, string>> {
+async processImg(parameters: ProfileData, file: FileEntry) : Promise<Result<CompressResult, string>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("process_img", { parameters, path }) };
+    return { status: "ok", data: await TAURI_INVOKE("process_img", { parameters, file }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
 },
-async getFileInfo(file: FileEntry) : Promise<Result<FileEntry, string>> {
+async getFileInfo(path: string) : Promise<Result<FileInfoResult, string>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("get_file_info", { file }) };
+    return { status: "ok", data: await TAURI_INVOKE("get_file_info", { path }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
@@ -93,8 +93,9 @@ async openFinderAtPath(path: string) : Promise<Result<null, string>> {
 /** user-defined types **/
 
 export type CompressResult = { path: string; out_path: string; result: string }
-export type FileEntry = { path: string; file: string | null; status: FileEntryStatus; size: number | null; savings: number | null; ext: string | null; error: string | null }
+export type FileEntry = { path: string; file: string | null; status: FileEntryStatus; size: number | null; original_size: number | null; ext: string | null; error: string | null }
 export type FileEntryStatus = "Processing" | "Compressing" | "Complete" | "Error"
+export type FileInfoResult = { size: number; extension: string; filename: string }
 export type ImageType = "JPEG" | "PNG" | "WEBP" | "GIF" | "TIFF"
 export type ProfileData = { name: string; id: number; active: boolean; should_resize: boolean; should_convert: boolean; should_overwrite: boolean; convert_extension: ImageType; postfix: string; resize_width: number; resize_height: number; jpeg_quality: number; png_quality: number; webp_quality: number; gif_quality: number }
 export type SettingsData = { version: number; theme: ThemeKind; profiles: ProfileData[] }

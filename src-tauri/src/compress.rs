@@ -16,9 +16,16 @@ pub struct FileEntry {
     pub file: Option<String>,
     pub status: FileEntryStatus,
     pub size: Option<u32>,
-    pub savings: Option<u32>,
+    pub original_size: Option<u32>,
     pub ext: Option<String>,
     pub error: Option<String>,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, serde::Serialize, serde::Deserialize, Type)]
+pub struct FileInfoResult {
+    pub size: u32,
+    pub extension: String,
+    pub filename: String,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy, serde::Serialize, serde::Deserialize, Type)]
@@ -61,18 +68,51 @@ pub struct CompressResult {
 
 #[tauri::command]
 #[specta::specta]
-pub async fn get_file_info(mut file: FileEntry) -> Result<FileEntry, String> {
-    file.savings = Some(0);
-    file.size = Some(0);
-    Ok(file)
+pub async fn get_file_info(path: &str) -> Result<FileInfoResult, String> {
+    let metadata_result = std::fs::metadata(&path);
+    let size: u32;
+    match metadata_result {
+        Ok(metadata) => {
+            if let Ok(_size) = metadata.len().try_into() {
+                size = _size;
+            } else {
+                return Err("File too large".to_string());
+            }
+        }
+        Err(err) => {
+            return Err(format!("Error getting file size: {}", err));
+        }
+    }
+
+    let extension = infer::get_from_path(&path)
+        .expect("file read successfully")
+        .expect("file type is known")
+        .extension()
+        .to_string();
+
+    let filename = Path::new(&path)
+        .file_name()
+        .unwrap()
+        .to_str()
+        .unwrap()
+        .to_string();
+
+    Ok(FileInfoResult {
+        size,
+        extension,
+        filename,
+    })
 }
 
 #[tauri::command]
 #[specta::specta]
-pub async fn process_img(parameters: ProfileData, path: String) -> Result<CompressResult, String> {
-    let img = read_image(&path)?;
-    let original_image_type = guess_image_type(&path)?;
-    let out_path = get_out_path(&parameters, original_image_type, &path);
+pub async fn process_img(
+    parameters: ProfileData,
+    file: FileEntry,
+) -> Result<CompressResult, String> {
+    let img = read_image(&file.path)?;
+    let original_image_type = guess_image_type(&file.path)?;
+    let out_path = get_out_path(&parameters, original_image_type, &file.path);
 
     let csparams = create_csparameters(&parameters, img.width(), img.height());
     drop(img);
@@ -81,13 +121,18 @@ pub async fn process_img(parameters: ProfileData, path: String) -> Result<Compre
         parameters.should_convert && parameters.convert_extension != original_image_type;
 
     let result = if should_convert {
-        convert_image(&path, &out_path, csparams, parameters.convert_extension)?
+        convert_image(
+            &file.path,
+            &out_path,
+            csparams,
+            parameters.convert_extension,
+        )?
     } else {
-        compress_image(&path, &out_path, csparams)?
+        compress_image(&file.path, &out_path, csparams)?
     };
 
     Ok(CompressResult {
-        path,
+        path: file.path,
         out_path,
         result,
     })

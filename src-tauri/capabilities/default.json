@@ -5,8 +5,10 @@
   "windows": ["main", "settings"],
   "permissions": [
     "core:default",
+    "core:event:default",
     "shell:allow-open",
     "dialog:default",
-    "store:default"
+    "store:default",
+    "deep-link:default"
   ]
 }

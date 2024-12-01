@@ -38,6 +38,17 @@ function StatusIcons(props: { status: FileEntryStatus }) {
   );
 }
 
+function toHumanReadableSize(size?: number) {
+  if (!size) {
+    return "? B";
+  }
+  if (size < 1024) {
+    return `${size} B`;
+  }
+  const i = Math.floor(Math.log(size) / Math.log(1024));
+  return `${(size / 1024 ** i).toFixed(1)} ${["B", "kB", "MB", "GB"][i]}`;
+}
+
 function ATable() {
   const [sorting, setSorting] = createSignal<SortingState>([]);
   const columns: ColumnDef<FileEntry>[] = [
@@ -56,6 +67,11 @@ function ATable() {
     },
     {
       accessorKey: "size",
+      cell: (props) => (
+        <span class="text-right">
+          {toHumanReadableSize(props.getValue() as number | undefined)}
+        </span>
+      ),
     },
   ];
 

@@ -44,6 +44,26 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "fileAssociations": [
+      {
+        "ext": ["jpg"]
+      },
+      {
+        "ext": ["jpeg", "jpg"]
+      },
+      {
+        "ext": ["png"]
+      },
+      {
+        "ext": ["gif"]
+      },
+      {
+        "ext": ["webp"]
+      },
+      {
+        "ext": ["tiff"]
+      }
+    ],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -53,6 +73,13 @@
     ],
     "macOS": {
       "minimumSystemVersion": "13"
+    }
+  },
+  "plugins": {
+    "deep-link": {
+      "desktop": {
+        "schemes": ["alic", "alicscheme"]
+      }
     }
   }
 }

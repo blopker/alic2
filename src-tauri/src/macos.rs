@@ -1,8 +1,4 @@
-use std::ffi::OsStr;
-use std::path::{Path, PathBuf};
 use tauri_plugin_shell::ShellExt;
-
-use tauri_plugin_shell::process::Command;
 
 #[tauri::command]
 #[specta::specta]

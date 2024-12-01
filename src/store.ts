@@ -19,36 +19,38 @@ async function addFile(path: string) {
   if (store.files.find((f) => f.path === path)) {
     return;
   }
-  const filename = path.split("/").pop() ?? "";
-  const ext = filename.split(".").pop() ?? "";
   const file: FileEntry = {
     path,
-    file: filename,
+    file: "",
     status: "Processing",
     size: null,
-    savings: null,
-    ext,
+    original_size: null,
+    ext: "",
     error: null,
   };
   setStore("files", (f) => [...f, file]);
-  const fileResult = await commands.getFileInfo(file);
+  const fileResult = await commands.getFileInfo(file.path);
   if (fileResult.status === "error") {
-    console.log(fileResult.error);
-    file.error = fileResult.error;
-    updateFile(file);
+    updateFile(file, { error: fileResult.error });
     return;
   }
-  updateFile(fileResult.data);
-  const f = fileResult.data;
-  f.status = "Compressing";
-  updateFile(f);
-  await compressImage(getProfileActive(), fileResult.data);
-  f.status = "Complete";
-  updateFile(f);
+  const update: Partial<FileEntry> = {
+    file: fileResult.data.filename,
+    ext: fileResult.data.extension,
+    original_size: fileResult.data.size,
+  };
+  updateFile(file, update);
+  updateFile(file, { status: "Compressing" });
+  const compressResult = await compressImage(getProfileActive(), file);
+  if (compressResult.status === "error") {
+    updateFile(file, { error: compressResult.error });
+    return;
+  }
+  updateFile(file, { status: "Complete" });
 }
 
-function updateFile(file: FileEntry) {
-  setStore("files", (f) => f.path === file.path, file);
+function updateFile(file: FileEntry, update: Partial<FileEntry>) {
+  setStore("files", (f) => f.path === file.path, { ...file, ...update });
   // hack to make the table update
   setStore("files", [...store.files]);
 }
