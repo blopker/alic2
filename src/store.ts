@@ -3,18 +3,14 @@ import { type FileEntry, commands } from "./bindings";
 import { compressImage } from "./compress";
 import { getProfileActive } from "./settings/settingsData";
 
-interface Store {
-  files: FileEntry[];
-  doubleCount: number;
-  tripleCount: number;
-}
-
 type ReadonlyFileEntry = Readonly<FileEntry>;
+
+interface Store {
+  files: ReadonlyFileEntry[];
+}
 
 const [store, setStore] = createStore<Store>({
   files: [],
-  doubleCount: 0,
-  tripleCount: 0,
 });
 
 async function addFile(path: string) {
@@ -52,8 +48,7 @@ async function addFile(path: string) {
 }
 
 function updateFile(file: FileEntry, update: Partial<FileEntry>) {
-  const newFile: ReadonlyFileEntry = { ...file, ...update };
-  setStore("files", (f) => f.path === file.path, newFile);
+  setStore("files", (f) => f.path === file.path, { ...file, ...update });
   // hack to make the table update
   setStore("files", [...store.files]);
 }
