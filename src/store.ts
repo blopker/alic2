@@ -13,38 +13,58 @@ const [store, setStore] = createStore<Store>({
   files: [],
 });
 
+function newFileEntry(
+  path: string,
+  data: Partial<FileEntry>,
+): ReadonlyFileEntry {
+  return {
+    path,
+    file: data.file ?? "",
+    status: data.status ?? "Processing",
+    size: data.size ?? null,
+    original_size: data.original_size ?? null,
+    ext: data.ext ?? "",
+    error: data.error ?? null,
+    savings: data.savings ?? null,
+  };
+}
+
 async function addFile(path: string) {
   if (store.files.find((f) => f.path === path)) {
     return;
   }
-  const file: ReadonlyFileEntry = {
-    path,
-    file: "",
-    status: "Processing",
-    size: null,
-    original_size: null,
-    ext: "",
-    error: null,
-  };
+
+  const file = newFileEntry(path, {});
   setStore("files", (f) => [...f, file]);
-  const fileResult = await commands.getFileInfo(file.path);
+
+  const fileResult = await commands.getFileInfo(path);
   if (fileResult.status === "error") {
-    updateFile(file, { error: fileResult.error });
+    console.log(fileResult.error);
+    updateFile(file, { error: fileResult.error, status: "Error" });
     return;
   }
+
   const update: Partial<FileEntry> = {
     file: fileResult.data.filename,
     ext: fileResult.data.extension,
     original_size: fileResult.data.size,
   };
   updateFile(file, update);
+
   updateFile(file, { status: "Compressing" });
   const compressResult = await compressImage(getProfileActive(), file);
   if (compressResult.status === "error") {
-    updateFile(file, { error: compressResult.error });
+    console.log(compressResult.error);
+    updateFile(file, { error: compressResult.error, status: "Error" });
     return;
   }
-  updateFile(file, { status: "Complete" });
+
+  const savings = fileResult.data.size - compressResult.data.out_size;
+  updateFile(file, {
+    status: "Complete",
+    size: compressResult.data.out_size,
+    savings,
+  });
 }
 
 function updateFile(file: FileEntry, update: Partial<FileEntry>) {

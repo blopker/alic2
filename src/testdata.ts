@@ -9,6 +9,7 @@ export const files: FileEntry[] = [
     original_size: 2,
     ext: "png",
     error: null,
+    savings: null,
   },
   {
     path: "test/test.png",
@@ -18,6 +19,7 @@ export const files: FileEntry[] = [
     original_size: null,
     ext: "png",
     error: null,
+    savings: 100,
   },
   {
     path: "test/test.png",
@@ -27,6 +29,7 @@ export const files: FileEntry[] = [
     original_size: null,
     ext: "png",
     error: null,
+    savings: 100,
   },
   {
     path: "test/test.png",
@@ -36,5 +39,6 @@ export const files: FileEntry[] = [
     original_size: null,
     ext: "png",
     error: "Ruhoh",
+    savings: 100,
   },
 ];

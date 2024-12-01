@@ -1,4 +1,5 @@
-use std::ffi::OsStr;
+use std::fs;
+use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
 
 use caesium;
@@ -18,6 +19,7 @@ pub struct FileEntry {
     pub size: Option<u32>,
     pub original_size: Option<u32>,
     pub ext: Option<String>,
+    pub savings: Option<u32>,
     pub error: Option<String>,
 }
 
@@ -46,22 +48,9 @@ pub enum ImageType {
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Type)]
-pub struct Parameters {
-    pub postfix: String,
-    pub path: String,
-    pub jpeg_quality: u32,
-    pub png_quality: u32,
-    pub webp_quality: u32,
-    pub gif_quality: u32,
-    pub resize: bool,
-    pub resize_width: u32,
-    pub resize_height: u32,
-    pub convert_extension: Option<ImageType>,
-}
-
-#[derive(serde::Serialize, serde::Deserialize, Type)]
 pub struct CompressResult {
     pub path: String,
+    pub out_size: u32,
     pub out_path: String,
     pub result: String,
 }
@@ -84,18 +73,15 @@ pub async fn get_file_info(path: &str) -> Result<FileInfoResult, String> {
         }
     }
 
-    let extension = infer::get_from_path(&path)
-        .expect("file read successfully")
-        .expect("file type is known")
+    let _path = Path::new(&path);
+
+    let extension = _path
         .extension()
+        .unwrap_or_default()
+        .to_string_lossy()
         .to_string();
 
-    let filename = Path::new(&path)
-        .file_name()
-        .unwrap()
-        .to_str()
-        .unwrap()
-        .to_string();
+    let filename = _path.file_name().unwrap().to_string_lossy().to_string();
 
     Ok(FileInfoResult {
         size,
@@ -110,32 +96,83 @@ pub async fn process_img(
     parameters: ProfileData,
     file: FileEntry,
 ) -> Result<CompressResult, String> {
-    let img = read_image(&file.path)?;
+    // check file exists,
+    // get type,
+    // need conversion?,
+    // calculate out path,
+    // calculate temp path,
+    // compress image to temp path,
+    // calculate savings,
+    // if not savings, delete temp file, return
+    // if out path is same as original, delete original
+    // move temp file to out path
+    let out_path = get_out_path(&parameters, &file.path);
+
+    if file.path == out_path && !parameters.should_overwrite {
+        return Err(
+            "Image would be overwritten. Enable Overwrite in settings to allow this.".to_string(),
+        );
+    }
+
+    let original_img = read_image(&file.path)?;
+    let csparams = create_csparameters(&parameters, original_img.width(), original_img.height());
+    drop(original_img);
+
     let original_image_type = guess_image_type(&file.path)?;
-    let out_path = get_out_path(&parameters, original_image_type, &file.path);
-
-    let csparams = create_csparameters(&parameters, img.width(), img.height());
-    drop(img);
-
     let should_convert =
         parameters.should_convert && parameters.convert_extension != original_image_type;
 
+    let temp_path = get_temp_path(&out_path);
     let result = if should_convert {
         convert_image(
             &file.path,
-            &out_path,
+            &temp_path,
             csparams,
             parameters.convert_extension,
         )?
     } else {
-        compress_image(&file.path, &out_path, csparams)?
+        compress_image(&file.path, &temp_path, csparams)?
     };
 
+    let temp_metadata_result = std::fs::metadata(&temp_path);
+    let temp_size: f64 = match temp_metadata_result {
+        Ok(result) => result.size() as f64,
+        Err(e) => return Err(e.to_string()),
+    };
+    let original_size = file.original_size.expect("Image size needs to be set") as f64;
+
+    if !parameters.should_convert && temp_size > original_size * 0.95 {
+        fs::remove_file(temp_path).expect("Cannot delete temp file");
+        return Err("Image cannot be compressed further.".to_string());
+    }
+
+    if out_path == file.path {
+        fs::remove_file(&file.path).expect("Cannot delete original file");
+    }
+
+    let rename_result = fs::rename(temp_path, &out_path);
+    match rename_result {
+        Ok(_) => {}
+        Err(e) => return Err(e.to_string()),
+    };
+    let out_size = temp_size as u32;
     Ok(CompressResult {
         path: file.path,
+        out_size,
         out_path,
         result,
     })
+}
+
+fn get_temp_path(path: &str) -> String {
+    // /original/path/test.png -> /original/path/.test.png
+    let path = Path::new(&path);
+    let filename = path.file_name().unwrap().to_string_lossy().to_string();
+    let directory = path.parent().unwrap().to_string_lossy().to_string();
+    Path::new(&directory)
+        .join(format!(".{}", filename))
+        .to_string_lossy()
+        .to_string()
 }
 
 fn read_image(path: &str) -> Result<DynamicImage, String> {
@@ -165,31 +202,26 @@ fn guess_image_type(path: &str) -> Result<ImageType, String> {
     }
 }
 
-fn get_out_path(parameters: &ProfileData, image_type: ImageType, path: &str) -> String {
-    let extension = if parameters.should_convert {
-        parameters.convert_extension
-    } else {
-        image_type
-    };
+fn get_out_path(parameters: &ProfileData, path: &str) -> String {
     let path = Path::new(&path);
-    let original_extension = path.extension().unwrap_or_default();
-    format!(
-        "{}{}.{}",
-        remove_extension(&path),
-        parameters.postfix,
-        convert_image_type(original_extension, extension)
-    )
+    let extension = match parameters.should_convert {
+        true => image_type_to_extension(parameters.convert_extension),
+        false => path
+            .extension()
+            .unwrap_or_default()
+            .to_string_lossy()
+            .to_string(),
+    };
+    let posfix = match parameters.add_posfix {
+        true => parameters.postfix.clone(),
+        false => "".to_string(),
+    };
+    format!("{}{}.{}", remove_extension(&path), posfix, extension)
 }
 
-fn convert_image_type(original_extension: &OsStr, image_type: ImageType) -> String {
+fn image_type_to_extension(image_type: ImageType) -> String {
     match image_type {
-        ImageType::JPEG => {
-            if original_extension == "jpeg" {
-                "jpeg".to_string()
-            } else {
-                "jpg".to_string()
-            }
-        }
+        ImageType::JPEG => "jpg".to_string(),
         ImageType::PNG => "png".to_string(),
         ImageType::WEBP => "webp".to_string(),
         ImageType::GIF => "gif".to_string(),
@@ -278,25 +310,55 @@ mod tests {
 
     #[test]
     fn test_convert_image_type() {
-        let result = convert_image_type(OsStr::new("jpeg"), ImageType::JPEG);
-        assert_eq!(result, "jpeg".to_string());
+        let result = image_type_to_extension(ImageType::JPEG);
+        assert_eq!(result, "jpg".to_string());
     }
 
     #[test]
     fn test_guess_image_type() {
-        let result = guess_image_type("test/test.png");
+        let result = guess_image_type("test/test.jpg");
         println!("{:?}", result);
-        assert_eq!(result.unwrap(), ImageType::PNG);
+        assert_eq!(result.unwrap(), ImageType::JPEG);
     }
 
     #[test]
     fn test_get_out_path() {
-        let parameters = ProfileData::new();
-        let image_type = ImageType::PNG;
-        let result = get_out_path(&parameters, image_type, &"data.png".to_string());
+        let mut parameters = ProfileData::new();
+        let mut result = get_out_path(&parameters, &"test/test.png".to_string());
         assert_eq!(result, "test/test.min.png".to_string());
+
+        parameters = ProfileData::new();
+        result = get_out_path(&parameters, &"test/test.jpeg".to_string());
+        assert_eq!(result, "test/test.min.jpeg".to_string());
+
+        parameters = ProfileData::new();
+        parameters.should_convert = true;
+        parameters.convert_extension = ImageType::PNG;
+        result = get_out_path(&parameters, &"test/test.jpeg".to_string());
+        assert_eq!(result, "test/test.min.png".to_string());
+
+        parameters = ProfileData::new();
+        parameters.should_convert = false;
+        parameters.convert_extension = ImageType::PNG;
+        result = get_out_path(&parameters, &"test/test.jpeg".to_string());
+        assert_eq!(result, "test/test.min.jpeg".to_string());
+
+        parameters = ProfileData::new();
+        parameters.add_posfix = false;
+        result = get_out_path(&parameters, &"test/test.jpeg".to_string());
+        assert_eq!(result, "test/test.jpeg".to_string());
+
+        parameters = ProfileData::new();
+        parameters.postfix = ".bong".to_string();
+        result = get_out_path(&parameters, &"test/test.jpeg".to_string());
+        assert_eq!(result, "test/test.bong.jpeg".to_string());
     }
 
+    #[test]
+    fn test_get_temp_path() {
+        let result = get_temp_path(&"test/test.png".to_string());
+        assert_eq!(result, "test/.test.png".to_string());
+    }
     // #[test]
     // fn test_process_image() {
     //     let parameters = Parameters {

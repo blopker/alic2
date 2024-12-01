@@ -64,9 +64,16 @@ function ATable() {
     },
     {
       accessorKey: "savings",
+      cell: (props) => (
+        <span class="text-right">
+          {toHumanReadableSize(props.getValue() as number | undefined)}
+        </span>
+      ),
     },
     {
       accessorKey: "size",
+      accessorFn: (file) => file.size ?? file.original_size,
+      header: "Size",
       cell: (props) => (
         <span class="text-right">
           {toHumanReadableSize(props.getValue() as number | undefined)}

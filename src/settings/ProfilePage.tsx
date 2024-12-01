@@ -92,12 +92,22 @@ function ProfilePage(props: { id: number; onDelete: () => void }) {
       </SettingBox>
       <div class="pt-8" />
       <SettingBox title="Output">
-        <SettingRow title="Overwrite">
+        <SettingRow title="Allow Overwrite">
           <SettingsToggle
             value={data().should_overwrite}
             onChange={(value) => {
               updateProfile(data().id, {
                 should_overwrite: value,
+              });
+            }}
+          />
+        </SettingRow>
+        <SettingRow title="Add Postfix">
+          <SettingsToggle
+            value={data().add_posfix ?? false}
+            onChange={(value) => {
+              updateProfile(data().id, {
+                add_posfix: value,
               });
             }}
           />

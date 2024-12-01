@@ -2,14 +2,9 @@ import { type Component, For, Show, createMemo, createSignal } from "solid-js";
 import "../App.css";
 import { Dynamic } from "solid-js/web";
 import type { ThemeKind } from "../bindings";
+import { NewProfileModal } from "./NewProfileModal";
 import { ProfilePage } from "./ProfilePage";
-import {
-  SettingBox,
-  SettingRow,
-  SettingsInput,
-  SettingsModal,
-  SettingsSelect,
-} from "./SettingsUI";
+import { SettingBox, SettingRow, SettingsSelect } from "./SettingsUI";
 import {
   createProfile,
   resetSettings,
@@ -60,7 +55,6 @@ export function Settings() {
 }
 
 function SettingsSideBar() {
-  const [newProfileName, setNewProfileName] = createSignal("");
   const profilePages = createMemo<SettingsPageData[]>(() => {
     return settings.profiles.map((p) => ({
       kind: `profile:${p.name}`,
@@ -71,40 +65,18 @@ function SettingsSideBar() {
   return (
     <div class="flex flex-col items-start p-4 gap-2">
       <Show when={showNewProfileModal()}>
-        <SettingsModal title="New Profile">
-          <div>Name</div>
-          <SettingsInput
-            label="Name"
-            value=""
-            class=""
-            onChange={async (value) => {
-              setNewProfileName(value);
-            }}
-          />
-          <div class="flex justify-between pt-6">
-            <button
-              onClick={async () => {
-                await createProfile(newProfileName());
-                const newProfile = settings.profiles.find(
-                  (p) => p.name === newProfileName(),
-                );
-                if (newProfile) {
-                  //get last profilepage
-                  const profi = profilePages().length - 1;
-                  setActivePage(profilePages()[profi]);
-                }
-                setNewProfileName("");
-                setShowNewProfileModal(false);
-              }}
-              type="button"
-            >
-              OK
-            </button>
-            <button type="button" onClick={() => setShowNewProfileModal(false)}>
-              Cancel
-            </button>
-          </div>
-        </SettingsModal>
+        <NewProfileModal
+          onClose={() => setShowNewProfileModal(false)}
+          onCreate={async (name: string) => {
+            await createProfile(name);
+            const newProfile = settings.profiles.find((p) => p.name === name);
+            if (newProfile) {
+              // get last profilepage
+              const profi = profilePages().length - 1;
+              setActivePage(profilePages()[profi]);
+            }
+          }}
+        />
       </Show>
       <For each={settingsPages()}>
         {(p) => (
@@ -156,7 +128,7 @@ function GeneralPage() {
       </SettingBox>
       <div class="pt-8" />
       <SettingBox title="Settings">
-        <SettingRow title="Reset Settings">
+        <SettingRow title="Reset All Settings">
           <button
             onClick={resetSettings}
             type="button"

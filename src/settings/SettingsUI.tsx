@@ -1,4 +1,4 @@
-import { For, type JSXElement } from "solid-js";
+import { For, type JSXElement, onMount } from "solid-js";
 import "../App.css";
 
 function SettingBox(props: { title: string; children: JSXElement }) {
@@ -88,10 +88,21 @@ function SettingsInput(props: {
   label: string;
   value: string;
   class: string;
+  placeholder?: string;
+  autoFocus?: boolean;
   onChange: (value: string) => void;
 }) {
+  let inputRef: HTMLInputElement | undefined;
+  onMount(() => {
+    if (inputRef && props.autoFocus) {
+      inputRef.focus();
+    }
+  });
   return (
     <input
+      ref={inputRef}
+      placeholder={props.placeholder}
+      autofocus={props.autoFocus}
       class={`${props.class} rounded-md border-0 py-1.5 shadow-sm sm:text-sm/6 bg-black`}
       type="text"
       value={props.value}
