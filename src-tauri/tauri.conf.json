@@ -1,8 +1,9 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
+  "mainBinaryName": "Alic",
   "productName": "Alic Image Compressor",
-  "version": "0.1.0",
-  "identifier": "io.kbl.alic",
+  "version": "2.0.0",
+  "identifier": "co.bollc.alic",
   "build": {
     "beforeDevCommand": "bun run dev",
     "devUrl": "http://localhost:1420",
