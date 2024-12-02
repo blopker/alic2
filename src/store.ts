@@ -58,13 +58,18 @@ async function addFile(path: string) {
     updateFile(file, { error: compressResult.error, status: "Error" });
     return;
   }
-
-  const savings = file.original_size ?? 0 - compressResult.data.out_size;
-  updateFile(file, {
+  console.log(file);
+  const out_size = compressResult.data.out_size;
+  let savings = null;
+  if (file.original_size !== null) {
+    savings = ((file.original_size - out_size) / file.original_size) * 100;
+  }
+  file = updateFile(file, {
     status: "Complete",
-    size: compressResult.data.out_size,
+    size: out_size,
     savings,
   });
+  console.log(file);
 }
 
 function updateFile(
