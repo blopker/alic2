@@ -1,9 +1,9 @@
 import { open } from "@tauri-apps/plugin-dialog";
-// Bottom app bar in solidjs
 import { FaSolidXmark } from "solid-icons/fa";
 import { VsSettings } from "solid-icons/vs";
 import type { JSXElement } from "solid-js";
 import { commands } from "./bindings";
+import { FILE_TYPES } from "./constants";
 import { SettingsSelect } from "./settings/SettingsUI";
 import {
   getProfileActive,
@@ -43,7 +43,7 @@ function AddButton() {
       filters: [
         {
           name: "Images",
-          extensions: ["png", "jpeg", "jpg", "gif", "webp", "tiff"],
+          extensions: FILE_TYPES,
         },
       ],
     });

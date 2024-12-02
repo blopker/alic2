@@ -24,6 +24,14 @@ async getFileInfo(path: string) : Promise<Result<FileInfoResult, string>> {
     else return { status: "error", error: e  as any };
 }
 },
+async getAllImages(path: string) : Promise<Result<string[], string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_all_images", { path }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 async getSettings() : Promise<Result<SettingsData, string>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("get_settings") };

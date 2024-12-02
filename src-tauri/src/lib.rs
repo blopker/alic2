@@ -35,6 +35,7 @@ pub fn run() {
         open_settings_window,
         compress::process_img,
         compress::get_file_info,
+        compress::get_all_images,
         settings::get_settings,
         settings::save_settings,
         settings::reset_settings,

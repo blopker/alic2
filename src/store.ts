@@ -34,7 +34,7 @@ async function addFile(path: string) {
     return;
   }
 
-  const file = newFileEntry(path, {});
+  let file = newFileEntry(path, {});
   setStore("files", (f) => [...f, file]);
 
   const fileResult = await commands.getFileInfo(path);
@@ -49,9 +49,9 @@ async function addFile(path: string) {
     ext: fileResult.data.extension,
     original_size: fileResult.data.size,
   };
-  updateFile(file, update);
+  file = updateFile(file, update);
 
-  updateFile(file, { status: "Compressing" });
+  file = updateFile(file, { status: "Compressing" });
   const compressResult = await compressImage(getProfileActive(), file);
   if (compressResult.status === "error") {
     console.log(compressResult.error);
@@ -59,7 +59,7 @@ async function addFile(path: string) {
     return;
   }
 
-  const savings = fileResult.data.size - compressResult.data.out_size;
+  const savings = file.original_size ?? 0 - compressResult.data.out_size;
   updateFile(file, {
     status: "Complete",
     size: compressResult.data.out_size,
@@ -67,10 +67,15 @@ async function addFile(path: string) {
   });
 }
 
-function updateFile(file: FileEntry, update: Partial<FileEntry>) {
-  setStore("files", (f) => f.path === file.path, { ...file, ...update });
+function updateFile(
+  file: FileEntry,
+  update: Partial<FileEntry>,
+): ReadonlyFileEntry {
+  const newFile: ReadonlyFileEntry = { ...file, ...update };
+  setStore("files", (f) => f.path === file.path, newFile);
   // hack to make the table update
   setStore("files", [...store.files]);
+  return newFile;
 }
 
 function clearFiles() {

@@ -1,6 +1,6 @@
-use std::fs;
 use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
+use std::{fs, io};
 
 use caesium;
 use caesium::parameters::CSParameters;
@@ -302,6 +302,54 @@ fn remove_extension(path: &Path) -> String {
         None => path.to_path_buf(),
     };
     result.to_string_lossy().to_string()
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn get_all_images(path: String) -> Result<Vec<String>, String> {
+    let file = Path::new(&path);
+    if !file.exists() {
+        return Err("File not found".to_string());
+    }
+    if file.is_file() {
+        if !is_image(&file) {
+            return Err("Unsupported file type".to_string());
+        }
+        return Ok(vec![path]);
+    }
+    Ok(find_images(path).unwrap())
+}
+
+fn find_images<P: AsRef<Path>>(directory: P) -> io::Result<Vec<String>> {
+    let mut images = Vec::new();
+
+    let entries = fs::read_dir(directory)?;
+
+    for entry in entries {
+        let entry = entry?;
+        let path = entry.path();
+
+        if path.is_dir() {
+            // Recursively search subdirectories and extend our vector
+            let mut subdir_images = find_images(&path)?;
+            images.append(&mut subdir_images);
+        } else if path.is_file() {
+            if is_image(&path) {
+                images.push(path.to_string_lossy().to_string());
+            }
+        }
+    }
+
+    Ok(images)
+}
+
+fn is_image(path: &Path) -> bool {
+    let supported_exts = ["png", "jpeg", "jpg", "gif", "webp", "tiff"];
+    let ext = path.extension().unwrap_or_default();
+    if !supported_exts.contains(&ext.to_str().unwrap()) {
+        return false;
+    }
+    true
 }
 
 #[cfg(test)]

@@ -3,20 +3,40 @@ import { type DragDropEvent, getCurrentWebview } from "@tauri-apps/api/webview";
 import { BsArrowDownSquare } from "solid-icons/bs";
 import { Show, createSignal, onCleanup } from "solid-js";
 import { Transition } from "solid-transition-group";
+import { commands } from "./bindings";
+import { FILE_TYPES } from "./constants";
 import { addFile } from "./store";
+
+function anyImage(...paths: string[]) {
+  for (const path of paths) {
+    if (FILE_TYPES.includes(path.split(".").pop() ?? "")) {
+      return true;
+    }
+  }
+  return false;
+}
 
 export default function Dropper() {
   const [showDropper, setShowDropper] = createSignal(false);
   const cancel = getCurrentWebview().onDragDropEvent(
-    (e: Event<DragDropEvent>) => {
+    async (e: Event<DragDropEvent>) => {
       if (e.payload.type === "enter") {
-        setShowDropper(true);
+        if (anyImage(...e.payload.paths)) {
+          setShowDropper(true);
+        }
       } else if (e.payload.type === "leave") {
         setShowDropper(false);
       } else if (e.payload.type === "drop") {
         setShowDropper(false);
         for (const path of e.payload.paths) {
-          addFile(path);
+          const images = await commands.getAllImages(path);
+          if (images.status === "error") {
+            console.log(images.error);
+            return;
+          }
+          for (const image of images.data) {
+            addFile(image);
+          }
         }
       }
     },
