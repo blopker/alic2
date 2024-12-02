@@ -7,15 +7,15 @@ import { addFile } from "./store";
 
 onOpenUrl((urls) => {
   console.log("deep link:", urls);
-  // [Log] deep link: – ["file:///Users/blopker/Downloads/akidwell-passport(1).jpg"]
+  // [Log] deep link: – ["file:///Users/blopker/Downloads/akidwell-passport%20(1).jpg"]
   for (const url of urls) {
-    addFile(url.replace("file://", ""));
+    addFile(decodeURI(url.replace("file://", "")));
   }
 });
 
 function App() {
   return (
-    <div class="flex flex-col h-screen">
+    <div class="flex flex-col h-screen select-none">
       <main class="grow w-full">
         <Dropper />
         <Table />
