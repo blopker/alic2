@@ -54,7 +54,7 @@ export default function Dropper() {
 
 function DropOverlay() {
   return (
-    <div class="frost absolute top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-80 transition-all z-50">
+    <div class="frost absolute top-0 left-0 w-full h-full flex items-center justify-center bg-primary/60 transition-all z-50">
       <BsArrowDownSquare size={100} />
     </div>
   );

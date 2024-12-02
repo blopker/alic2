@@ -112,7 +112,7 @@ function MyTable() {
   return (
     <div class="w-full grow pb-10 select-none">
       <table class="min-w-full">
-        <thead class="sticky top-0 bg-[#1b1b1b] z-40">
+        <thead class="sticky top-0 bg-secondary z-40 shadow-lg">
           <tr>
             <MyTH class="w-12" field="status">
               S
@@ -133,7 +133,7 @@ function MyTable() {
                 onDblClick={() => {
                   console.log(commands.openFinderAtPath(file.path));
                 }}
-                class="even:bg-[#262626] hover:bg-gray-700 cursor-default"
+                class="even:bg-secondary hover:bg-accent cursor-default"
               >
                 <MyTD>
                   <StatusIcons status={file.status} />
