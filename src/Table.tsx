@@ -1,5 +1,5 @@
 import { BsArrowDown, BsArrowDownSquare, BsArrowUp } from "solid-icons/bs";
-import { FaSolidCircleNotch, FaSolidXmark } from "solid-icons/fa";
+import { FaSolidCircleNotch, FaSolidMinus, FaSolidXmark } from "solid-icons/fa";
 import { FaSolidCheck } from "solid-icons/fa";
 import { TbDots } from "solid-icons/tb";
 import { For, type JSXElement, Match, Switch } from "solid-js";
@@ -25,6 +25,9 @@ function StatusIcons(props: { status: FileEntryStatus }) {
       </Match>
       <Match when={props.status === "Error"}>
         <FaSolidXmark />
+      </Match>
+      <Match when={props.status === "AlreadySmaller"}>
+        <FaSolidMinus />
       </Match>
     </Switch>
   );

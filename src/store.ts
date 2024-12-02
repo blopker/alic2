@@ -54,11 +54,17 @@ async function addFile(path: string) {
   file = updateFile(file, { status: "Compressing" });
   const compressResult = await compressImage(getProfileActive(), file);
   if (compressResult.status === "error") {
-    console.log(compressResult.error);
-    updateFile(file, { error: compressResult.error, status: "Error" });
+    if (compressResult.error.error_type === "NotSmaller") {
+      updateFile(file, {
+        error: compressResult.error.error,
+        status: "AlreadySmaller",
+      });
+      return;
+    }
+    updateFile(file, { error: compressResult.error.error, status: "Error" });
     return;
   }
-  console.log(file);
+
   const out_size = compressResult.data.out_size;
   let savings = null;
   if (file.original_size !== null) {
@@ -69,7 +75,6 @@ async function addFile(path: string) {
     size: out_size,
     savings,
   });
-  console.log(file);
 }
 
 function updateFile(

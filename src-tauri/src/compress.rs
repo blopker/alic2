@@ -35,6 +35,7 @@ pub enum FileEntryStatus {
     Processing,
     Compressing,
     Complete,
+    AlreadySmaller,
     Error,
 }
 
@@ -53,6 +54,22 @@ pub struct CompressResult {
     pub out_size: u32,
     pub out_path: String,
     pub result: String,
+}
+
+#[derive(serde::Serialize, serde::Deserialize, Type)]
+pub struct CompressError {
+    pub error: String,
+    pub error_type: CompressErrorType,
+}
+
+#[derive(serde::Serialize, serde::Deserialize, Type)]
+pub enum CompressErrorType {
+    Unknown,
+    FileTooLarge,
+    FileNotFound,
+    UnsupportedFileType,
+    WontOverwrite,
+    NotSmaller,
 }
 
 #[tauri::command]
@@ -95,7 +112,7 @@ pub async fn get_file_info(path: &str) -> Result<FileInfoResult, String> {
 pub async fn process_img(
     parameters: ProfileData,
     file: FileEntry,
-) -> Result<CompressResult, String> {
+) -> Result<CompressResult, CompressError> {
     // check file exists,
     // get type,
     // need conversion?,
@@ -109,16 +126,35 @@ pub async fn process_img(
     let out_path = get_out_path(&parameters, &file.path);
 
     if file.path == out_path && !parameters.should_overwrite {
-        return Err(
-            "Image would be overwritten. Enable Overwrite in settings to allow this.".to_string(),
-        );
+        return Err(CompressError {
+            error: "Image would be overwritten. Enable Overwrite in settings to allow this."
+                .to_string(),
+            error_type: CompressErrorType::WontOverwrite,
+        });
     }
 
-    let original_img = read_image(&file.path)?;
+    let original_img = match read_image(&file.path) {
+        Ok(img) => img,
+        Err(err) => {
+            return Err(CompressError {
+                error: err,
+                error_type: CompressErrorType::UnsupportedFileType,
+            })
+        }
+    };
+
     let csparams = create_csparameters(&parameters, original_img.width(), original_img.height());
     drop(original_img);
 
-    let original_image_type = guess_image_type(&file.path)?;
+    let original_image_type = match guess_image_type(&file.path) {
+        Ok(img) => img,
+        Err(err) => {
+            return Err(CompressError {
+                error: err,
+                error_type: CompressErrorType::UnsupportedFileType,
+            })
+        }
+    };
     let should_convert =
         parameters.should_convert && parameters.convert_extension != original_image_type;
 
@@ -129,38 +165,64 @@ pub async fn process_img(
             &temp_path,
             csparams,
             parameters.convert_extension,
-        )?
+        )
     } else {
-        compress_image(&file.path, &temp_path, csparams)?
+        compress_image(&file.path, &temp_path, csparams)
     };
+
+    if result.is_err() {
+        return Err(CompressError {
+            error: result.err().unwrap().to_string(),
+            error_type: CompressErrorType::Unknown,
+        });
+    }
 
     let temp_metadata_result = std::fs::metadata(&temp_path);
     let temp_size: f64 = match temp_metadata_result {
         Ok(result) => result.size() as f64,
-        Err(e) => return Err(e.to_string()),
+        Err(e) => {
+            return Err(CompressError {
+                error: e.to_string(),
+                error_type: CompressErrorType::FileNotFound,
+            })
+        }
     };
     let original_size = file.original_size.expect("Image size needs to be set") as f64;
 
     if !parameters.should_convert && temp_size > original_size * 0.95 {
         fs::remove_file(temp_path).expect("Cannot delete temp file");
-        return Err("Image cannot be compressed further.".to_string());
+        return Err(CompressError {
+            error: "Image cannot be compressed further.".to_string(),
+            error_type: CompressErrorType::NotSmaller,
+        });
     }
 
     if out_path == file.path {
-        fs::remove_file(&file.path).expect("Cannot delete original file");
+        let res = fs::remove_file(&file.path);
+        if res.is_err() {
+            return Err(CompressError {
+                error: res.err().unwrap().to_string(),
+                error_type: CompressErrorType::Unknown,
+            });
+        }
     }
 
     let rename_result = fs::rename(temp_path, &out_path);
     match rename_result {
         Ok(_) => {}
-        Err(e) => return Err(e.to_string()),
+        Err(e) => {
+            return Err(CompressError {
+                error: e.to_string(),
+                error_type: CompressErrorType::Unknown,
+            })
+        }
     };
     let out_size = temp_size as u32;
     Ok(CompressResult {
         path: file.path,
         out_size,
         out_path,
-        result,
+        result: "Success".to_string(),
     })
 }
 
