@@ -5,7 +5,7 @@ function SettingBox(props: { title: string; children: JSXElement }) {
   return (
     <div>
       <div class="pb-2">{props.title}</div>
-      <div class="border-2 rounded-xl border-gray-700 p-4 gap-4 flex flex-col">
+      <div class="border-2 rounded-xl border-accent p-4 gap-4 flex flex-col">
         {props.children}
       </div>
     </div>
@@ -58,7 +58,7 @@ function SettingsSelect(props: {
 }) {
   return (
     <select
-      class={`${props.class} rounded-md border-0 py-1.5 shadow-sm sm:text-sm/6 bg-black`}
+      class={`${props.class} rounded-md border-0 py-1.5 shadow-sm sm:text-sm/6 bg-primary`}
       value={props.value}
       onChange={(e) => {
         props.onChange(e.target.value);
@@ -103,7 +103,7 @@ function SettingsInput(props: {
       ref={inputRef}
       placeholder={props.placeholder}
       autofocus={props.autoFocus}
-      class={`${props.class} rounded-md border-0 py-1.5 shadow-sm sm:text-sm/6 bg-black`}
+      class={`${props.class} rounded-md border-0 py-1.5 shadow-sm sm:text-sm/6 bg-primary`}
       type="text"
       value={props.value}
       onInput={(e) => {

@@ -14,7 +14,7 @@ import { addFile, clearFiles, store } from "./store";
 
 export default function BottomBar() {
   return (
-    <div class="fixed bottom-0 left-0 right-0 flex items-center justify-between bg-[#403F3F] h-10 px-2 shadow-2xl">
+    <div class="fixed bottom-0 left-0 right-0 flex items-center justify-between bg-secondary h-10 px-2 shadow-2xl">
       <AddButton />
       <span class="grow" />
       <SettingsSelect
@@ -94,7 +94,7 @@ function Button(props: {
       type="button"
       onClick={props.onClick}
       disabled={props.disabled}
-      class="relative text-center border-[0.5px] border-gray-800 rounded-sm min-h-6 min-w-10 enabled:hover:bg-gray-600 p-0 m-0 leading-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+      class="relative text-center border-[0.5px] border-accent rounded-sm min-h-6 min-w-10 enabled:hover:bg-gray-600 p-0 m-0 leading-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
     >
       {props.children}
     </button>

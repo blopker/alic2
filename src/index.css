@@ -1,6 +1,23 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/forms";
 
+@theme inline {
+    --color-primary: var(--color-theme-primary);
+    --color-secondary: var(--color-theme-secondary);
+    --color-accent: var(--color-theme-accent);
+}
+
+:root {
+    --color-theme-primary: #fff;
+    --color-theme-secondary: #e9e9e9;
+    --color-theme-accent: #dedede;
+    @media (prefers-color-scheme: dark) {
+        --color-theme-primary: #1b1b1b;
+        --color-theme-secondary: #242424;
+        --color-theme-accent: #3d3d3d;
+    }
+}
+
 html {
     height: 100%;
     overflow: hidden;

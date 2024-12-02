@@ -33,8 +33,8 @@ const [activePage, setActivePage] = createSignal<SettingsPageData>(
 
 export function Settings() {
   return (
-    <main class="h-screen justify-between w-full flex">
-      <div class="w-40 border-r-[1px] border-black">
+    <main class="h-screen justify-between w-full flex bg-secondary">
+      <div class="w-40 border-r-[1px] border-accent">
         <SettingsSideBar />
       </div>
       <div class="grow p-4 overflow-scroll">

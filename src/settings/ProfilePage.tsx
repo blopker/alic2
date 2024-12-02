@@ -114,7 +114,7 @@ function ProfilePage(props: { id: number; onDelete: () => void }) {
         </SettingRow>
         <SettingRow title="Postfix">
           <input
-            class="w-20 rounded-md border-0 py-1.5 shadow-sm sm:text-sm/6 bg-black"
+            class="w-20 rounded-md border-0 py-1.5 shadow-sm sm:text-sm/6 bg-primary"
             type="text"
             value={data().postfix}
             onInput={(e) => {
@@ -193,7 +193,7 @@ function NumberInput(props: {
 }) {
   return (
     <input
-      class="w-20 rounded-md border-0 py-1.5 shadow-sm sm:text-sm/6 bg-black"
+      class="w-20 rounded-md border-0 py-1.5 shadow-sm sm:text-sm/6 bg-primary"
       type="text"
       min="1"
       value={props.value}
