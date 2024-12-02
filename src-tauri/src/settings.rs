@@ -115,7 +115,7 @@ pub async fn save_settings(app: tauri::AppHandle, settings: SettingsData) -> Res
         .store("settings.json")
         .expect("Failed to get settings from store");
     store.set("settings", serde_json::to_value(settings.clone()).unwrap());
-    println!("Set settings: {:?}", settings);
+    // println!("Set settings: {:?}", settings);
     app.emit("settings-changed", true).unwrap();
     Ok(())
 }

@@ -53,11 +53,11 @@ pub fn run() {
         )
         .expect("Failed to export typescript bindings");
     tauri::Builder::default()
-        .plugin(tauri_plugin_single_instance::init(|_app, args, cwd| {
+        .plugin(tauri_plugin_single_instance::init(|_app, _args, _cwd| {
             println!("Second instance detected:");
             // println!("App: {:?}", app.cli().matches());
-            println!("CWD: {:?}", cwd);
-            println!("Args: {:?}", args);
+            // println!("CWD: {:?}", cwd);
+            // println!("Args: {:?}", args);
         }))
         .plugin(tauri_plugin_deep_link::init())
         .plugin(tauri_plugin_dialog::init())

@@ -1,16 +1,10 @@
 import { type Component, For, Show, createMemo, createSignal } from "solid-js";
 import "../App.css";
 import { Dynamic } from "solid-js/web";
-import type { ThemeKind } from "../bindings";
 import { NewProfileModal } from "./NewProfileModal";
 import { ProfilePage } from "./ProfilePage";
-import { SettingBox, SettingRow, SettingsSelect } from "./SettingsUI";
-import {
-  createProfile,
-  resetSettings,
-  setTheme,
-  settings,
-} from "./settingsData";
+import { SettingBox, SettingRow } from "./SettingsUI";
+import { createProfile, resetSettings, settings } from "./settingsData";
 
 interface SettingsPageData {
   kind: string;
@@ -25,7 +19,7 @@ const [settingsPages, _] = createSignal<SettingsPageData[]>([
 
 const [showNewProfileModal, setShowNewProfileModal] = createSignal(false);
 
-const themeKinds: ThemeKind[] = ["System", "Light", "Dark"];
+// const themeKinds: ThemeKind[] = ["System", "Light", "Dark"];
 
 const [activePage, setActivePage] = createSignal<SettingsPageData>(
   settingsPages()[0],
@@ -116,7 +110,7 @@ function GeneralPage() {
   return (
     <div>
       <h1 class="text-left text-xl font-bold pb-4">General</h1>
-      <SettingBox title="Interface">
+      {/* <SettingBox title="Interface">
         <SettingRow title="Theme">
           <SettingsSelect
             class="w-40"
@@ -126,7 +120,7 @@ function GeneralPage() {
           />
         </SettingRow>
       </SettingBox>
-      <div class="pt-8" />
+      <div class="pt-8" /> */}
       <SettingBox title="Settings">
         <SettingRow title="Reset All Settings">
           <button

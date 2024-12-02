@@ -1,8 +1,9 @@
+import Tooltip from "@corvu/tooltip";
 import { BsArrowDown, BsArrowDownSquare, BsArrowUp } from "solid-icons/bs";
 import { FaSolidCircleNotch, FaSolidMinus, FaSolidXmark } from "solid-icons/fa";
 import { FaSolidCheck } from "solid-icons/fa";
 import { TbDots } from "solid-icons/tb";
-import { For, type JSXElement, Match, Switch } from "solid-js";
+import { For, type JSXElement, Match, Switch, splitProps } from "solid-js";
 import { Show, createSignal } from "solid-js";
 import type { FileEntry, FileEntryStatus } from "./bindings";
 import { commands } from "./bindings";
@@ -80,9 +81,14 @@ function MyTable() {
     </th>
   );
 
-  const MyTD = (props: { children: JSXElement }) => (
-    <td class="px-2">{props.children}</td>
-  );
+  const MyTD = (props: { children: JSXElement }) => {
+    const [local, others] = splitProps(props, ["children"]);
+    return (
+      <td {...others} class="px-2">
+        {local.children}
+      </td>
+    );
+  };
   const handleSort = (field: keyof FileEntry) => {
     if (sortField() === field) {
       setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
@@ -138,10 +144,28 @@ function MyTable() {
                 }}
                 class="even:bg-secondary hover:bg-accent cursor-default"
               >
-                <MyTD>
-                  <StatusIcons status={file.status} />
-                </MyTD>
-                <MyTD>{file.file}</MyTD>
+                <Tooltip>
+                  <Tooltip.Trigger as={MyTD}>
+                    <StatusIcons status={file.status} />
+                  </Tooltip.Trigger>
+                  <Tooltip.Portal>
+                    <Tooltip.Content class="bg-secondary border-[1px] border-accent px-2 py-1">
+                      <Show when={file.error} fallback={file.status}>
+                        {file.error}
+                      </Show>
+                    </Tooltip.Content>
+                  </Tooltip.Portal>
+                </Tooltip>
+
+                <Tooltip>
+                  <Tooltip.Trigger as={MyTD}>{file.file}</Tooltip.Trigger>
+                  <Tooltip.Portal>
+                    <Tooltip.Content class="bg-secondary border-[1px] border-accent px-2 py-1">
+                      {file.path}
+                    </Tooltip.Content>
+                  </Tooltip.Portal>
+                </Tooltip>
+
                 <MyTD>
                   <Show when={file.savings} fallback="?">
                     {(file.savings ?? 0).toFixed(1)}%

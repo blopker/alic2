@@ -12,6 +12,7 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@corvu/tooltip": "^0.2.1",
     "@solid-primitives/keyboard": "^1.2.8",
     "@tailwindcss/vite": "^4.0.0-beta.4",
     "@tauri-apps/api": "^2.1.1",

@@ -427,7 +427,6 @@ mod tests {
     #[test]
     fn test_guess_image_type() {
         let result = guess_image_type("test/test.jpg");
-        println!("{:?}", result);
         assert_eq!(result.unwrap(), ImageType::JPEG);
     }
 

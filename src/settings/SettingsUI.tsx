@@ -76,7 +76,7 @@ function SettingsSelect(props: {
 function SettingsModal(props: { title: string; children: JSXElement }) {
   return (
     <div class="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50 transition-all z-50">
-      <div class="bg-gray-900 rounded-xl p-4 w-full max-w-sm">
+      <div class="bg-secondary rounded-md p-4 w-full max-w-sm">
         <div class="text-xl font-bold pb-4">{props.title}</div>
         {props.children}
       </div>
