@@ -39,6 +39,7 @@ function updateVersion(type: "major" | "minor" | "patch") {
     `version = "${newVersion}"`,
   );
   fs.writeFileSync(cargoPath, newCargoToml);
+  execSync("cd src-tauri && cargo update -p alic2");
 
   // Update package.json
   const packagePath = "package.json";
@@ -70,12 +71,19 @@ function main() {
     const changelogEntry = `\n## [${newVersion}] - ${date}\n\n- TODO: Add changes here\n`;
     fs.appendFileSync("CHANGELOG.md", changelogEntry);
 
-    // Create commit and tag
-    execSync("git add .");
-    execSync(`git commit -m "chore: release v${newVersion}"`);
-    execSync(`git tag -a v${newVersion} -m "Release v${newVersion}"`);
+    // Delete existing release branch locally and remotely if it exists
+    try {
+      execSync("git branch -D release");
+    } catch (e) {
+      // Branch doesn't exist locally, that's fine
+    }
+    try {
+      execSync("git push origin :release");
+    } catch (e) {
+      // Branch doesn't exist remotely, that's fine
+    }
 
-    // Create and push release branch
+    // Create and push new release branch
     execSync("git checkout -b release");
     execSync("git push origin release --force");
     execSync("git push origin --tags");
