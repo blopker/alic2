@@ -39,7 +39,7 @@ function updateVersion(type: "major" | "minor" | "patch") {
     `version = "${newVersion}"`,
   );
   fs.writeFileSync(cargoPath, newCargoToml);
-  execSync("cd src-tauri && cargo update -p alic2");
+  execSync("cd src-tauri && cargo update -p alic");
 
   // Update package.json
   const packagePath = "package.json";
