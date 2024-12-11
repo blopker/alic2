@@ -3,6 +3,54 @@ import { execSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 
+function updateChangelog(newVersion: string): void {
+  const date = new Date().toISOString().split("T")[0];
+  const changelogPath = "CHANGELOG.md";
+  const changelog = fs.readFileSync(changelogPath, "utf8");
+
+  // Split changelog into lines
+  const lines = changelog.split("\n");
+
+  // Find the Unreleased section
+  const unreleasedIndex = lines.findIndex((line) =>
+    line.includes("## Unreleased"),
+  );
+  if (unreleasedIndex === -1) {
+    throw new Error("Could not find Unreleased section in CHANGELOG.md");
+  }
+
+  // Find the next version section
+  const nextVersionIndex = lines.findIndex(
+    (line, i) => i > unreleasedIndex && line.startsWith("## ["),
+  );
+
+  // Get unreleased changes
+  const unreleasedChanges = lines
+    .slice(
+      unreleasedIndex + 1,
+      nextVersionIndex === -1 ? undefined : nextVersionIndex,
+    )
+    .filter((line) => line.trim() !== "");
+
+  // Create new version section with unreleased changes
+  const newVersionSection = [
+    `## [${newVersion}] - ${date}`,
+    ...unreleasedChanges,
+  ].join("\n");
+
+  // Reset unreleased section
+  const newChangelog = [
+    "# Changelog",
+    "",
+    "## Unreleased",
+    "",
+    newVersionSection,
+    ...lines.slice(nextVersionIndex === -1 ? lines.length : nextVersionIndex),
+  ].join("\n");
+
+  fs.writeFileSync(changelogPath, newChangelog);
+}
+
 function updateVersion(type: "major" | "minor" | "patch") {
   // Read current version from Cargo.toml
   const cargoPath = path.join("src-tauri", "Cargo.toml");
@@ -67,9 +115,9 @@ function main() {
     const newVersion = updateVersion(type);
 
     // Create changelog entry
-    const date = new Date().toISOString().split("T")[0];
-    const changelogEntry = `\n## [${newVersion}] - ${date}\n\n- TODO: Add changes here\n`;
-    fs.appendFileSync("CHANGELOG.md", changelogEntry);
+    updateChangelog(newVersion);
+
+    // Commit and push changes
     execSync(`git commit -am "Bump version to ${newVersion}"`);
     // Delete existing release branch locally and remotely if it exists
     try {
