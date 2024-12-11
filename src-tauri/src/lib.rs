@@ -2,13 +2,20 @@ mod compress;
 mod macos;
 mod settings;
 
-use tauri::Manager;
+use tauri::{
+    menu::{AboutMetadataBuilder, Menu, MenuItem, SubmenuBuilder},
+    Emitter, Manager,
+};
 use tauri_plugin_store::StoreExt;
 use tauri_specta::{collect_commands, Builder};
 
 #[tauri::command]
 #[specta::specta]
 async fn open_settings_window(app: tauri::AppHandle) {
+    _open_settings_window(&app);
+}
+
+fn _open_settings_window(app: &tauri::AppHandle) {
     let window_label = "settings";
     let config = &app
         .config()
@@ -22,7 +29,7 @@ async fn open_settings_window(app: tauri::AppHandle) {
         window.show().unwrap();
     } else {
         // If the window does not exist, create it
-        tauri::WebviewWindowBuilder::from_config(&app, config)
+        tauri::WebviewWindowBuilder::from_config(app, config)
             .unwrap()
             .build()
             .unwrap();
@@ -63,6 +70,71 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_store::Builder::default().build())
+        .menu(|app| {
+            let menu = Menu::new(app)?;
+            let about = AboutMetadataBuilder::default()
+                .copyright(Some("© All rights reserved Bollc."))
+                .build();
+            let submenu = SubmenuBuilder::new(app, "Main")
+                .about(Some(about))
+                .item(&MenuItem::new(
+                    app,
+                    "Check for Updates",
+                    true,
+                    None::<&str>,
+                )?)
+                .item(&MenuItem::with_id(
+                    app,
+                    "settings",
+                    "Settings...",
+                    true,
+                    Some("CmdOrCtrl+,"),
+                )?)
+                .separator()
+                .services()
+                .separator()
+                .hide()
+                .hide_others()
+                .show_all()
+                .quit()
+                .build()?;
+            menu.append(&submenu)?;
+            // here `"quit".to_string()` defines the menu item id, and the second parameter is the menu item label.
+            let file_submenu = SubmenuBuilder::new(app, "File")
+                .item(&MenuItem::with_id(
+                    app,
+                    "open",
+                    "Open Image...",
+                    true,
+                    Some("CmdOrCtrl+O"),
+                )?)
+                .item(&MenuItem::with_id(
+                    app,
+                    "clear",
+                    "Clear Images",
+                    true,
+                    Some("CmdOrCtrl+D"),
+                )?)
+                .close_window()
+                .build()?;
+            menu.append(&file_submenu)?;
+            Ok(menu)
+        })
+        .on_menu_event(|app, event| {
+            println!("{:?}", event);
+            match event.id().0.as_str() {
+                "settings" => {
+                    _open_settings_window(app);
+                }
+                "open" => {
+                    app.emit("open-file", ()).unwrap();
+                }
+                "clear" => {
+                    app.emit("clear-files", ()).unwrap();
+                }
+                _ => {}
+            }
+        })
         .invoke_handler(builder.invoke_handler())
         .setup(move |app| {
             // This is also required for events

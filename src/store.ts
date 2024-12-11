@@ -1,8 +1,10 @@
+import { listen } from "@tauri-apps/api/event";
 import { createStore } from "solid-js/store";
 import { type FileEntry, commands } from "./bindings";
 import { compressImage } from "./compress";
 import { getProfileActive } from "./settings/settingsData";
 
+listen("clear-files", clearFiles);
 type ReadonlyFileEntry = Readonly<FileEntry>;
 
 interface Store {

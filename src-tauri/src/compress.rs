@@ -1,6 +1,7 @@
 use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
 use std::{fs, io};
+use tokio::task;
 
 use caesium;
 use caesium::parameters::CSParameters;
@@ -369,17 +370,22 @@ fn remove_extension(path: &Path) -> String {
 #[tauri::command]
 #[specta::specta]
 pub async fn get_all_images(path: String) -> Result<Vec<String>, String> {
-    let file = Path::new(&path);
-    if !file.exists() {
-        return Err("File not found".to_string());
-    }
-    if file.is_file() {
-        if !is_image(&file) {
-            return Err("Unsupported file type".to_string());
+    let res = task::spawn_blocking(move || {
+        let file = Path::new(&path);
+        if !file.exists() {
+            return Err("File not found".to_string());
         }
-        return Ok(vec![path]);
-    }
-    Ok(find_images(path).unwrap())
+        if file.is_file() {
+            if !is_image(&file) {
+                return Err("Unsupported file type".to_string());
+            }
+            return Ok(vec![path]);
+        }
+        Ok(find_images(path).unwrap())
+    })
+    .await
+    .unwrap();
+    return res;
 }
 
 fn find_images<P: AsRef<Path>>(directory: P) -> io::Result<Vec<String>> {

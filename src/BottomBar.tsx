@@ -1,7 +1,8 @@
+import { listen } from "@tauri-apps/api/event";
 import { open } from "@tauri-apps/plugin-dialog";
 import { FaSolidXmark } from "solid-icons/fa";
 import { VsSettings } from "solid-icons/vs";
-import type { JSXElement } from "solid-js";
+import { type JSXElement, onCleanup } from "solid-js";
 import { commands } from "./bindings";
 import { FILE_TYPES } from "./constants";
 import { SettingsSelect } from "./settings/SettingsUI";
@@ -12,9 +13,36 @@ import {
 } from "./settings/settingsData";
 import { addFile, clearFiles, store } from "./store";
 
+async function openFile() {
+  console.log("open file");
+  const file = await open({
+    multiple: true,
+    directory: false,
+    filters: [
+      {
+        name: "Images",
+        extensions: FILE_TYPES,
+      },
+    ],
+  });
+  console.log(file);
+  if (!file) {
+    return;
+  }
+  for (const f of file) {
+    addFile(f);
+  }
+}
+
 export default function BottomBar() {
+  const unlisten = listen("open-file", async () => {
+    await openFile();
+  });
+  onCleanup(async () => {
+    (await unlisten)();
+  });
   return (
-    <div class="fixed bottom-0 left-0 right-0 flex items-center justify-between bg-secondary h-10 px-2 shadow-2xl">
+    <div class="fixed bottom-0 left-0 right-0 flex items-center justify-between bg-secondary h-10 px-2 border-t-[1px] border-accent">
       <AddButton />
       <span class="grow" />
       <SettingsSelect
@@ -35,26 +63,6 @@ export default function BottomBar() {
 }
 
 function AddButton() {
-  async function openFile() {
-    console.log("open file");
-    const file = await open({
-      multiple: true,
-      directory: false,
-      filters: [
-        {
-          name: "Images",
-          extensions: FILE_TYPES,
-        },
-      ],
-    });
-    console.log(file);
-    if (!file) {
-      return;
-    }
-    for (const f of file) {
-      addFile(f);
-    }
-  }
   return <Button onClick={openFile}>+</Button>;
 }
 
