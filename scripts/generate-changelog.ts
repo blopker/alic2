@@ -30,7 +30,7 @@ ${commits}
   try {
     const response =
       execSync(`curl -X POST http://localhost:11434/api/generate -d '{
-      "model": "mistral",
+      "model": "mistral-nemo",
       "prompt": ${JSON.stringify(prompt)}
     }'`).toString();
 
