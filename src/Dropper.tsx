@@ -7,12 +7,6 @@ import { Transition } from "solid-transition-group";
 import { commands } from "./bindings";
 import { addFile } from "./store";
 
-const onNewFile = new Channel<string>();
-onNewFile.onmessage = (path) => {
-  console.log(`got download event ${path}`);
-  addFile(path);
-};
-
 export default function Dropper() {
   const [showDropper, setShowDropper] = createSignal(false);
   const cancel = getCurrentWebview().onDragDropEvent(
@@ -26,6 +20,10 @@ export default function Dropper() {
       } else if (e.payload.type === "drop") {
         setShowDropper(false);
         for (const path of e.payload.paths) {
+          const onNewFile = new Channel<string>();
+          onNewFile.onmessage = (path) => {
+            addFile(path);
+          };
           commands.getAllImages(path, onNewFile);
         }
       }

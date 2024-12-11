@@ -9,6 +9,7 @@ import type { FileEntry, FileEntryStatus } from "./bindings";
 import { commands } from "./bindings";
 import { store } from "./store";
 import { testStore } from "./testdata";
+import { toHumanReadableSize } from "./utils";
 
 const useTestData = false;
 
@@ -32,17 +33,6 @@ function StatusIcons(props: { status: FileEntryStatus }) {
       </Match>
     </Switch>
   );
-}
-
-function toHumanReadableSize(size?: number | null) {
-  if (!size) {
-    return "?";
-  }
-  if (size < 1024) {
-    return `${size} B`;
-  }
-  const i = Math.floor(Math.log(size) / Math.log(1024));
-  return `${(size / 1024 ** i).toFixed(1)} ${["B", "kB", "MB", "GB"][i]}`;
 }
 
 function MyTable() {

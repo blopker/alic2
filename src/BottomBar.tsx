@@ -2,7 +2,7 @@ import { listen } from "@tauri-apps/api/event";
 import { open } from "@tauri-apps/plugin-dialog";
 import { FaSolidXmark } from "solid-icons/fa";
 import { VsAdd, VsSettings } from "solid-icons/vs";
-import { type JSXElement, onCleanup } from "solid-js";
+import { type JSXElement, Show, onCleanup } from "solid-js";
 import { commands } from "./bindings";
 import { FILE_TYPES } from "./constants";
 import { SettingsSelect } from "./settings/SettingsUI";
@@ -12,6 +12,7 @@ import {
   settings,
 } from "./settings/settingsData";
 import { addFile, clearFiles, store } from "./store";
+import { toHumanReadableSize } from "./utils";
 
 async function openFile() {
   console.log("open file");
@@ -44,6 +45,7 @@ export default function BottomBar() {
   return (
     <div class="fixed bottom-0 gap-2 left-0 right-0 flex items-center justify-between bg-secondary h-10 px-2 border-t-[1px] border-accent">
       <AddButton />
+      <StatusText />
       <span class="grow" />
       <SettingsSelect
         value={getProfileActive().name}
@@ -84,6 +86,25 @@ function ClearButton() {
 
 async function settingsWindow() {
   await commands.openSettingsWindow();
+}
+
+function StatusText() {
+  const doneFiles = () => store.files.filter((f) => f.status === "Complete");
+  const dataSaved = () =>
+    doneFiles()
+      .map((f) => f.originalSize ?? 0 - (f.size ?? 0))
+      .reduce((a, b) => a + b, 0);
+  const dataSavedPercent = () =>
+    doneFiles()
+      .filter((f) => f.savings)
+      .map((f) => f.savings ?? 0)
+      .reduce((a, b) => a + b, 0) / doneFiles().length;
+  return (
+    <Show when={doneFiles().length > 0}>
+      {toHumanReadableSize(dataSaved())} saved, average{" "}
+      {dataSavedPercent().toFixed(1)}%
+    </Show>
+  );
 }
 
 function SettingsButton() {
