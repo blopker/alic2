@@ -1,6 +1,6 @@
 import { type Component, For, Show, createMemo, createSignal } from "solid-js";
-import "../App.css";
 import { Dynamic } from "solid-js/web";
+import "../App.css";
 import { NewProfileModal } from "./NewProfileModal";
 import { ProfilePage } from "./ProfilePage";
 import { SettingBox, SettingRow } from "./SettingsUI";
@@ -27,11 +27,11 @@ const [activePage, setActivePage] = createSignal<SettingsPageData>(
 
 export function Settings() {
   return (
-    <main class="h-screen justify-between w-full flex bg-secondary">
-      <div class="w-40 border-r-[1px] border-accent">
+    <main class="flex h-screen w-full justify-between bg-secondary">
+      <div class="w-40 border-accent border-r-[1px]">
         <SettingsSideBar />
       </div>
-      <div class="grow p-4 overflow-scroll">
+      <div class="grow overflow-scroll bg-primary p-4">
         <Show when={activePage().page}>
           <Dynamic component={activePage().page} />
         </Show>
@@ -57,7 +57,7 @@ function SettingsSideBar() {
     }));
   });
   return (
-    <div class="flex flex-col items-start p-4 gap-2">
+    <div class="flex flex-col items-start gap-2 p-4">
       <Show when={showNewProfileModal()}>
         <NewProfileModal
           onClose={() => setShowNewProfileModal(false)}
@@ -85,7 +85,7 @@ function SettingsSideBar() {
           </button>
         )}
       </For>
-      <div class="text-sm pt-2">Profiles</div>
+      <div class="pt-2 text-sm">Profiles</div>
       <For each={profilePages()}>
         {(p) => (
           <button
@@ -109,7 +109,7 @@ function SettingsSideBar() {
 function GeneralPage() {
   return (
     <div>
-      <h1 class="text-left text-xl font-bold pb-4">General</h1>
+      <h1 class="pb-4 text-left font-bold text-xl">General</h1>
       {/* <SettingBox title="Interface">
         <SettingRow title="Theme">
           <SettingsSelect
@@ -126,7 +126,7 @@ function GeneralPage() {
           <button
             onClick={resetSettings}
             type="button"
-            class="bg-red-500 hover:bg-red-700 text-white font-bold px-4 rounded-sm"
+            class="rounded-sm bg-red-500 px-4 font-bold text-white hover:bg-red-700"
           >
             Reset
           </button>

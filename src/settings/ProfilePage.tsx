@@ -20,7 +20,7 @@ function ProfilePage(props: { id: number; onDelete: () => void }) {
   };
   return (
     <div>
-      <h1 class="text-left text-xl font-bold pb-4">{data().name}</h1>
+      <h1 class="pb-4 text-left font-bold text-xl">{data().name}</h1>
       <SettingBox title="Quality">
         <SettingRow title="JPEG Quality">
           <QualitySlider
@@ -114,7 +114,7 @@ function ProfilePage(props: { id: number; onDelete: () => void }) {
         </SettingRow>
         <SettingRow title="Postfix">
           <input
-            class="w-20 rounded-md border-0 py-1.5 shadow-sm sm:text-sm/6 bg-primary"
+            class="w-20 rounded-md border-0 bg-primary py-1.5 shadow-sm sm:text-sm/6"
             type="text"
             value={data().postfix}
             onInput={(e) => {
@@ -164,7 +164,7 @@ function ProfilePage(props: { id: number; onDelete: () => void }) {
               });
             }}
             type="button"
-            class="bg-red-500 hover:bg-red-700 text-white font-bold px-4 rounded"
+            class="rounded bg-red-500 px-4 font-bold text-white hover:bg-red-700"
           >
             Reset
           </button>
@@ -177,7 +177,7 @@ function ProfilePage(props: { id: number; onDelete: () => void }) {
               props.onDelete();
             }}
             type="button"
-            class="bg-red-500 hover:bg-red-700 text-white font-bold px-4 rounded disabled:opacity-50 disabled:hover:bg-red-500"
+            class="rounded bg-red-500 px-4 font-bold text-white hover:bg-red-700 disabled:opacity-50 disabled:hover:bg-red-500"
           >
             Delete
           </button>
@@ -193,7 +193,7 @@ function NumberInput(props: {
 }) {
   return (
     <input
-      class="w-20 rounded-md border-0 py-1.5 shadow-sm sm:text-sm/6 bg-primary"
+      class="w-20 rounded-md border-0 bg-primary py-1.5 shadow-sm sm:text-sm/6"
       type="text"
       min="1"
       value={props.value}

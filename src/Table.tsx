@@ -11,7 +11,8 @@ import { store } from "./store";
 import { testStore } from "./testdata";
 import { toHumanReadableSize } from "./utils";
 
-const useTestData = false;
+// const useTestData = false;
+const useTestData = true;
 
 function StatusIcons(props: { status: FileEntryStatus }) {
   return (
@@ -64,7 +65,7 @@ function MyTable() {
       onClick={() => handleSort(props.field)}
       class={`px-2 text-left capitalize ${props.class ?? ""}`}
     >
-      <div class="flex align-middle items-center cursor-pointer whitespace-nowrap">
+      <div class="flex cursor-pointer items-center whitespace-nowrap align-middle">
         {props.children}
         <SortIcon field={props.field} />
       </div>
@@ -109,9 +110,9 @@ function MyTable() {
     });
   };
   return (
-    <div class="w-full grow pb-10 select-none">
+    <div class="flex h-full w-full select-none flex-col">
       <table class="min-w-full">
-        <thead class="sticky top-0 bg-secondary z-40 shadow-lg">
+        <thead class="sticky top-0 z-40 bg-secondary shadow-lg">
           <tr>
             <MyTH class="w-12" field="status">
               S
@@ -125,55 +126,59 @@ function MyTable() {
             </MyTH>
           </tr>
         </thead>
-        <tbody class="text-clip max-h-svh">
-          <For each={sortedFiles()}>
-            {(file) => (
-              <tr
-                onDblClick={() => {
-                  console.log(commands.openFinderAtPath(file.path));
-                }}
-                class="even:bg-secondary hover:bg-accent cursor-default"
-              >
-                <Tooltip>
-                  <Tooltip.Trigger as={MyTD}>
-                    <StatusIcons status={file.status} />
-                  </Tooltip.Trigger>
-                  <Tooltip.Portal>
-                    <Tooltip.Content class="bg-secondary border-[1px] border-accent px-2 py-1">
-                      <Show when={file.error} fallback={file.status}>
-                        {file.error}
-                      </Show>
-                    </Tooltip.Content>
-                  </Tooltip.Portal>
-                </Tooltip>
-
-                <Tooltip>
-                  <Tooltip.Trigger as={MyTD}>{file.file}</Tooltip.Trigger>
-                  <Tooltip.Portal>
-                    <Tooltip.Content class="bg-secondary border-[1px] border-accent px-2 py-1">
-                      {file.path}
-                    </Tooltip.Content>
-                  </Tooltip.Portal>
-                </Tooltip>
-
-                <MyTD>
-                  <Show when={file.savings} fallback="?">
-                    {(file.savings ?? 0).toFixed(1)}%
-                  </Show>
-                </MyTD>
-                <MyTD>{toHumanReadableSize(file.originalSize)}</MyTD>
-              </tr>
-            )}
-          </For>
-        </tbody>
       </table>
+      <div class="grow overflow-y-auto">
+        <table class="min-w-full">
+          <tbody class="text-clip">
+            <For each={sortedFiles()}>
+              {(file) => (
+                <tr
+                  onDblClick={() => {
+                    console.log(commands.openFinderAtPath(file.path));
+                  }}
+                  class="cursor-default even:bg-secondary hover:bg-accent"
+                >
+                  <Tooltip>
+                    <Tooltip.Trigger as={MyTD}>
+                      <StatusIcons status={file.status} />
+                    </Tooltip.Trigger>
+                    <Tooltip.Portal>
+                      <Tooltip.Content class="border-[1px] border-accent bg-secondary px-2 py-1">
+                        <Show when={file.error} fallback={file.status}>
+                          {file.error}
+                        </Show>
+                      </Tooltip.Content>
+                    </Tooltip.Portal>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <Tooltip.Trigger as={MyTD}>{file.file}</Tooltip.Trigger>
+                    <Tooltip.Portal>
+                      <Tooltip.Content class="border-[1px] border-accent bg-secondary px-2 py-1">
+                        {file.path}
+                      </Tooltip.Content>
+                    </Tooltip.Portal>
+                  </Tooltip>
+
+                  <MyTD>
+                    <Show when={file.savings} fallback="?">
+                      {(file.savings ?? 0).toFixed(1)}%
+                    </Show>
+                  </MyTD>
+                  <MyTD>{toHumanReadableSize(file.originalSize)}</MyTD>
+                </tr>
+              )}
+            </For>
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
 
 function PlaceHolder() {
   return (
-    <div class="w-full grow flex items-center justify-center h-full pb-10">
+    <div class="flex h-full w-full grow items-center justify-center">
       <BsArrowDownSquare size={100} class="opacity-50" />
     </div>
   );

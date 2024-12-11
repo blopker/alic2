@@ -23,6 +23,10 @@ html {
     overflow: hidden;
 }
 
+* {
+    overscroll-behavior-y: none;
+}
+
 body {
     overscroll-behavior-y: none;
     height: 100%;

@@ -15,9 +15,9 @@ onOpenUrl((urls) => {
 
 function App() {
   return (
-    <div class="flex flex-col h-screen select-none">
-      <main class="grow w-full">
-        <Dropper />
+    <div class="flex h-screen select-none flex-col">
+      <Dropper />
+      <main class="w-full grow overflow-scroll">
         <Table />
       </main>
       <BottomBar />

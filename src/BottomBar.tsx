@@ -43,7 +43,7 @@ export default function BottomBar() {
     (await unlisten)();
   });
   return (
-    <div class="fixed bottom-0 gap-2 left-0 right-0 flex items-center justify-between bg-secondary h-10 px-2 border-t-[1px] border-accent">
+    <div class="right-0 left-0 flex h-10 items-center justify-between gap-2 border-accent border-t-[1px] bg-secondary px-2">
       <AddButton />
       <StatusText />
       <span class="grow" />
@@ -67,7 +67,7 @@ export default function BottomBar() {
 function AddButton() {
   return (
     <Button onClick={openFile}>
-      <span class="text-sm flex items-center justify-center">
+      <span class="flex items-center justify-center text-sm">
         <VsAdd />
       </span>
     </Button>
@@ -77,7 +77,7 @@ function AddButton() {
 function ClearButton() {
   return (
     <Button onClick={clearFiles} disabled={store.files.length === 0}>
-      <span class="px-2 text-sm flex items-center gap-1">
+      <span class="flex items-center gap-1 px-2 text-sm">
         <FaSolidXmark /> Clear
       </span>
     </Button>
@@ -110,7 +110,7 @@ function StatusText() {
 function SettingsButton() {
   return (
     <Button onClick={settingsWindow}>
-      <span class="text-sm flex items-center justify-center">
+      <span class="flex items-center justify-center text-sm">
         <VsSettings />
       </span>
     </Button>
@@ -128,7 +128,7 @@ function Button(props: {
       type="button"
       onClick={props.onClick}
       disabled={props.disabled}
-      class={`${props.class} relative text-center border-[0.5px] border-accent rounded-sm min-h-6 min-w-10 enabled:hover:bg-gray-600 p-0 m-0 leading-none transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
+      class={`${props.class} relative m-0 min-h-6 min-w-10 rounded-sm border-[0.5px] border-accent p-0 text-center leading-none transition-all enabled:hover:bg-gray-600 disabled:cursor-not-allowed disabled:opacity-50`}
     >
       {props.children}
     </button>

@@ -5,7 +5,7 @@ function SettingBox(props: { title: string; children: JSXElement }) {
   return (
     <div>
       <div class="pb-2">{props.title}</div>
-      <div class="border-2 rounded-xl border-accent p-4 gap-4 flex flex-col">
+      <div class="flex flex-col gap-4 rounded-xl border-2 border-accent p-4">
         {props.children}
       </div>
     </div>
@@ -14,7 +14,7 @@ function SettingBox(props: { title: string; children: JSXElement }) {
 
 function SettingRow(props: { title: string; children: JSXElement }) {
   return (
-    <div class="flex gap-2 justify-between items-center">
+    <div class="flex items-center justify-between gap-2">
       <div>{props.title}</div>
       <div>{props.children}</div>
     </div>
@@ -58,7 +58,7 @@ function SettingsSelect(props: {
 }) {
   return (
     <select
-      class={`${props.class} rounded-md border-0 py-1.5 shadow-sm sm:text-sm/6 bg-primary`}
+      class={`${props.class} rounded-md border-0 bg-primary py-1.5 shadow-sm sm:text-sm/6`}
       value={props.value}
       onChange={(e) => {
         props.onChange(e.target.value);
@@ -75,9 +75,9 @@ function SettingsSelect(props: {
 
 function SettingsModal(props: { title: string; children: JSXElement }) {
   return (
-    <div class="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50 transition-all z-50">
-      <div class="bg-secondary rounded-md p-4 w-full max-w-sm">
-        <div class="text-xl font-bold pb-4">{props.title}</div>
+    <div class="fixed top-0 left-0 z-50 flex h-full w-full items-center justify-center bg-black bg-opacity-50 transition-all">
+      <div class="w-full max-w-sm rounded-md bg-secondary p-4">
+        <div class="pb-4 font-bold text-xl">{props.title}</div>
         {props.children}
       </div>
     </div>
@@ -103,7 +103,7 @@ function SettingsInput(props: {
       ref={inputRef}
       placeholder={props.placeholder}
       autofocus={props.autoFocus}
-      class={`${props.class} rounded-md border-0 py-1.5 shadow-sm sm:text-sm/6 bg-primary`}
+      class={`${props.class} rounded-md border-0 bg-primary py-1.5 shadow-sm sm:text-sm/6`}
       type="text"
       value={props.value}
       onInput={(e) => {

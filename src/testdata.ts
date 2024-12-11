@@ -67,4 +67,4 @@ function updateFile(file: FileEntry) {
 //   }
 // }, 1000);
 
-export { testStore };
+export { testStore, updateFile };
