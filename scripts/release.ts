@@ -34,8 +34,9 @@ function updateChangelog(newVersion: string): void {
 
   // Create new version section with unreleased changes
   const newVersionSection = [
-    `## [${newVersion}] - ${date}`,
+    `## [${newVersion}] - ${date}\n`,
     ...unreleasedChanges,
+    "\n",
   ].join("\n");
 
   // Reset unreleased section
