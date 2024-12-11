@@ -1,6 +1,6 @@
 [package]
 name = "alic"
-version = "2.1.1"
+version = "2.1.2"
 description = "Alic Image Compressor"
 authors = ["you"]
 edition = "2021"

@@ -70,7 +70,7 @@ function main() {
     const date = new Date().toISOString().split("T")[0];
     const changelogEntry = `\n## [${newVersion}] - ${date}\n\n- TODO: Add changes here\n`;
     fs.appendFileSync("CHANGELOG.md", changelogEntry);
-
+    execSync(`git commit -am "Bump version to ${newVersion}"`);
     // Delete existing release branch locally and remotely if it exists
     try {
       execSync("git branch -D release");
@@ -86,6 +86,7 @@ function main() {
     // Create and push new release branch
     execSync("git checkout -b release");
     execSync("git push origin release --force");
+    execSync(`git tag -a v${newVersion} -m "Release v${newVersion}"`);
     execSync("git push origin --tags");
 
     // Go back to main
