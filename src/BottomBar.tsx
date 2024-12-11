@@ -1,7 +1,7 @@
 import { listen } from "@tauri-apps/api/event";
 import { open } from "@tauri-apps/plugin-dialog";
 import { FaSolidXmark } from "solid-icons/fa";
-import { VsSettings } from "solid-icons/vs";
+import { VsAdd, VsSettings } from "solid-icons/vs";
 import { type JSXElement, onCleanup } from "solid-js";
 import { commands } from "./bindings";
 import { FILE_TYPES } from "./constants";
@@ -42,12 +42,12 @@ export default function BottomBar() {
     (await unlisten)();
   });
   return (
-    <div class="fixed bottom-0 left-0 right-0 flex items-center justify-between bg-secondary h-10 px-2 border-t-[1px] border-accent">
+    <div class="fixed bottom-0 gap-2 left-0 right-0 flex items-center justify-between bg-secondary h-10 px-2 border-t-[1px] border-accent">
       <AddButton />
       <span class="grow" />
       <SettingsSelect
         value={getProfileActive().name}
-        class="mr-2 w-40"
+        class="w-40"
         onChange={(value) => {
           const profile = settings.profiles.find((p) => p.name === value);
           if (profile) {
@@ -63,7 +63,13 @@ export default function BottomBar() {
 }
 
 function AddButton() {
-  return <Button onClick={openFile}>+</Button>;
+  return (
+    <Button onClick={openFile}>
+      <span class="text-sm flex items-center justify-center">
+        <VsAdd />
+      </span>
+    </Button>
+  );
 }
 
 function ClearButton() {
@@ -82,19 +88,18 @@ async function settingsWindow() {
 
 function SettingsButton() {
   return (
-    <button
-      onClick={settingsWindow}
-      type="button"
-      class="relative text-center rounded-sm hover:gray-600 transition-all p-2"
-    >
-      <VsSettings />
-    </button>
+    <Button onClick={settingsWindow}>
+      <span class="text-sm flex items-center justify-center">
+        <VsSettings />
+      </span>
+    </Button>
   );
 }
 
 function Button(props: {
   onClick: () => void;
   children: JSXElement;
+  class?: string;
   disabled?: boolean;
 }) {
   return (
@@ -102,7 +107,7 @@ function Button(props: {
       type="button"
       onClick={props.onClick}
       disabled={props.disabled}
-      class="relative text-center border-[0.5px] border-accent rounded-sm min-h-6 min-w-10 enabled:hover:bg-gray-600 p-0 m-0 leading-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+      class={`${props.class} relative text-center border-[0.5px] border-accent rounded-sm min-h-6 min-w-10 enabled:hover:bg-gray-600 p-0 m-0 leading-none transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
     >
       {props.children}
     </button>

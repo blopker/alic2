@@ -1,18 +1,18 @@
-use std::os::unix::fs::MetadataExt;
-use std::path::{Path, PathBuf};
-use std::{fs, io};
-use tokio::task;
-
+use super::settings;
 use caesium;
 use caesium::parameters::CSParameters;
 use image;
 use image::DynamicImage;
 use serde;
 use specta::Type;
+use std::fs;
+use std::os::unix::fs::MetadataExt;
+use tauri::ipc::Channel;
 
-use crate::settings::ProfileData;
+use std::path::{Path, PathBuf};
 
 #[derive(Debug, Eq, PartialEq, Clone, serde::Serialize, serde::Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
 pub struct FileEntry {
     pub path: String,
     pub file: Option<String>,
@@ -50,6 +50,7 @@ pub enum ImageType {
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
 pub struct CompressResult {
     pub path: String,
     pub out_size: u32,
@@ -58,6 +59,7 @@ pub struct CompressResult {
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
 pub struct CompressError {
     pub error: String,
     pub error_type: CompressErrorType,
@@ -75,43 +77,8 @@ pub enum CompressErrorType {
 
 #[tauri::command]
 #[specta::specta]
-pub async fn get_file_info(path: &str) -> Result<FileInfoResult, String> {
-    let metadata_result = std::fs::metadata(&path);
-    let size: u32;
-    match metadata_result {
-        Ok(metadata) => {
-            if let Ok(_size) = metadata.len().try_into() {
-                size = _size;
-            } else {
-                return Err("File too large".to_string());
-            }
-        }
-        Err(err) => {
-            return Err(format!("Error getting file size: {}", err));
-        }
-    }
-
-    let _path = Path::new(&path);
-
-    let extension = _path
-        .extension()
-        .unwrap_or_default()
-        .to_string_lossy()
-        .to_string();
-
-    let filename = _path.file_name().unwrap().to_string_lossy().to_string();
-
-    Ok(FileInfoResult {
-        size,
-        extension,
-        filename,
-    })
-}
-
-#[tauri::command]
-#[specta::specta]
 pub async fn process_img(
-    parameters: ProfileData,
+    parameters: settings::ProfileData,
     file: FileEntry,
 ) -> Result<CompressResult, CompressError> {
     // check file exists,
@@ -227,6 +194,70 @@ pub async fn process_img(
     })
 }
 
+// #[derive(Debug)]
+// struct ScanError {
+//     error: String,
+//     path: String,
+// }
+
+// pub fn scan_directory_for_images(
+//     path: impl Into<PathBuf>,
+// ) -> impl Stream<Item = Result<PathBuf, ScanError>> {
+//     let (tx, rx) = mpsc::channel(100);
+//     let path = path.into();
+//     if !path.is_dir() {
+//         if is_image(&path) {
+//             tx.send(Ok(path));
+//         } else {
+//             tx.send(Err(ScanError {
+//                 path: path.to_string_lossy().to_string(),
+//                 error: "Not a directory or image".to_string(),
+//             }));
+//         }
+//         return ReceiverStream::new(rx);
+//     }
+//     tokio::spawn(async move {
+//         async fn visit_dirs(
+//             dir: PathBuf,
+//             tx: mpsc::Sender<Result<PathBuf, ScanError>>,
+//         ) -> Result<(), String> {
+//             let read_dir = tokio::fs::read_dir(&dir).await.map_err(|e| e.to_string())?;
+
+//             let mut read_dir = read_dir;
+//             while let Some(entry) = read_dir.next_entry().await.map_err(|e| e.to_string())? {
+//                 let path = entry.path();
+//                 if is_image(&path) {
+//                     if tx.send(Ok(path)).await.is_err() {
+//                         break;
+//                     }
+//                 } else if path.is_dir() {
+//                     let future = visit_dirs(path.clone(), tx.clone());
+//                     if let Err(e) = Box::pin(future).await {
+//                         let _ = tx
+//                             .send(Err(ScanError {
+//                                 path: path.to_string_lossy().to_string(),
+//                                 error: e,
+//                             }))
+//                             .await;
+//                     }
+//                 }
+//             }
+//             Ok(())
+//         }
+
+//         if let Err(e) = Box::pin(visit_dirs(path.clone(), tx.clone())).await {
+//             let _ = tx
+//                 .send(Err(ScanError {
+//                     path: path.to_string_lossy().to_string(),
+//                     error: e,
+//                 }))
+//                 .await;
+//         }
+//     });
+
+//     ReceiverStream::new(rx)
+// }
+
 fn get_temp_path(path: &str) -> String {
     // /original/path/test.png -> /original/path/.test.png
     let path = Path::new(&path);
@@ -265,7 +296,7 @@ fn guess_image_type(path: &str) -> Result<ImageType, String> {
     }
 }
 
-fn get_out_path(parameters: &ProfileData, path: &str) -> String {
+fn get_out_path(parameters: &settings::ProfileData, path: &str) -> String {
     let path = Path::new(&path);
     let extension = match parameters.should_convert {
         true => image_type_to_extension(parameters.convert_extension),
@@ -292,7 +323,11 @@ fn image_type_to_extension(image_type: ImageType) -> String {
     }
 }
 
-fn create_csparameters(parameters: &ProfileData, width: u32, height: u32) -> CSParameters {
+fn create_csparameters(
+    parameters: &settings::ProfileData,
+    width: u32,
+    height: u32,
+) -> CSParameters {
     let mut new_height = 0;
     let mut new_width = 0;
 
@@ -369,49 +404,81 @@ fn remove_extension(path: &Path) -> String {
 
 #[tauri::command]
 #[specta::specta]
-pub async fn get_all_images(path: String) -> Result<Vec<String>, String> {
-    let res = task::spawn_blocking(move || {
-        let file = Path::new(&path);
-        if !file.exists() {
-            return Err("File not found".to_string());
+pub async fn get_all_images(path: String, on_event: Channel<String>) {
+    let file = Path::new(&path);
+    if !file.exists() {
+        return;
+    }
+    if file.is_file() {
+        if !is_image(&file) {
+            return;
         }
-        if file.is_file() {
-            if !is_image(&file) {
-                return Err("Unsupported file type".to_string());
-            }
-            return Ok(vec![path]);
-        }
-        Ok(find_images(path).unwrap())
-    })
-    .await
-    .unwrap();
-    return res;
+        on_event.send(path).unwrap();
+        return;
+    }
+    find_images(path, &on_event);
 }
 
-fn find_images<P: AsRef<Path>>(directory: P) -> io::Result<Vec<String>> {
-    let mut images = Vec::new();
-
-    let entries = fs::read_dir(directory)?;
+fn find_images<P: AsRef<Path>>(directory: P, on_event: &Channel<String>) {
+    let entries = match fs::read_dir(directory) {
+        Ok(entries) => entries,
+        Err(_) => return,
+    };
 
     for entry in entries {
-        let entry = entry?;
-        let path = entry.path();
+        let path = match entry {
+            Ok(e) => e.path(),
+            Err(_) => continue,
+        };
 
         if path.is_dir() {
-            // Recursively search subdirectories and extend our vector
-            let mut subdir_images = find_images(&path)?;
-            images.append(&mut subdir_images);
-        } else if path.is_file() {
-            if is_image(&path) {
-                images.push(path.to_string_lossy().to_string());
+            // Recursively search subdirectories
+            find_images(&path, &on_event);
+        } else if is_image(&path) {
+            on_event.send(path.to_string_lossy().to_string()).unwrap();
+        }
+    }
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn get_file_info(path: &str) -> Result<FileInfoResult, String> {
+    let metadata_result = std::fs::metadata(&path);
+    let size: u32;
+    match metadata_result {
+        Ok(metadata) => {
+            if let Ok(_size) = metadata.len().try_into() {
+                size = _size;
+            } else {
+                return Err("File too large".to_string());
             }
+        }
+        Err(err) => {
+            return Err(format!("Error getting file size: {}", err));
         }
     }
 
-    Ok(images)
+    let _path = Path::new(&path);
+
+    let extension = _path
+        .extension()
+        .unwrap_or_default()
+        .to_string_lossy()
+        .to_string();
+
+    let filename = _path.file_name().unwrap().to_string_lossy().to_string();
+
+    Ok(FileInfoResult {
+        size,
+        extension,
+        filename,
+    })
 }
 
 fn is_image(path: &Path) -> bool {
+    if !path.is_file() {
+        return false;
+    }
     let supported_exts = ["png", "jpeg", "jpg", "gif", "webp", "tiff"];
     let ext = path.extension().unwrap_or_default();
     if !supported_exts.contains(&ext.to_str().unwrap()) {
@@ -438,32 +505,32 @@ mod tests {
 
     #[test]
     fn test_get_out_path() {
-        let mut parameters = ProfileData::new();
+        let mut parameters = settings::ProfileData::new();
         let mut result = get_out_path(&parameters, &"test/test.png".to_string());
         assert_eq!(result, "test/test.min.png".to_string());
 
-        parameters = ProfileData::new();
+        parameters = settings::ProfileData::new();
         result = get_out_path(&parameters, &"test/test.jpeg".to_string());
         assert_eq!(result, "test/test.min.jpeg".to_string());
 
-        parameters = ProfileData::new();
+        parameters = settings::ProfileData::new();
         parameters.should_convert = true;
         parameters.convert_extension = ImageType::PNG;
         result = get_out_path(&parameters, &"test/test.jpeg".to_string());
         assert_eq!(result, "test/test.min.png".to_string());
 
-        parameters = ProfileData::new();
+        parameters = settings::ProfileData::new();
         parameters.should_convert = false;
         parameters.convert_extension = ImageType::PNG;
         result = get_out_path(&parameters, &"test/test.jpeg".to_string());
         assert_eq!(result, "test/test.min.jpeg".to_string());
 
-        parameters = ProfileData::new();
+        parameters = settings::ProfileData::new();
         parameters.add_posfix = false;
         result = get_out_path(&parameters, &"test/test.jpeg".to_string());
         assert_eq!(result, "test/test.jpeg".to_string());
 
-        parameters = ProfileData::new();
+        parameters = settings::ProfileData::new();
         parameters.postfix = ".bong".to_string();
         result = get_out_path(&parameters, &"test/test.jpeg".to_string());
         assert_eq!(result, "test/test.bong.jpeg".to_string());

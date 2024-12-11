@@ -1,8 +1,10 @@
+use std::sync::Arc;
+
 use serde::{self};
 use serde_json::json;
 use specta::Type;
-use tauri::Emitter;
-use tauri_plugin_store::StoreExt;
+use tauri::{Emitter, Wry};
+use tauri_plugin_store::{Store, StoreExt};
 
 use crate::compress::ImageType;
 
@@ -85,73 +87,34 @@ impl ProfileData {
 #[tauri::command]
 #[specta::specta]
 pub async fn get_settings(app: tauri::AppHandle) -> Result<SettingsData, String> {
-    let store = app
-        .store("settings.json")
-        .expect("Failed create settings from store");
-
-    // set default settings if not set
-    if !store.has(SETTINGS_KEY) {
-        store.set(SETTINGS_KEY, json!(SettingsData::new()));
-    }
-    let value = store
-        .get(SETTINGS_KEY)
-        .expect("Failed to get value from store");
-
-    let data: Result<SettingsData, _> = serde_json::from_value(value);
-
-    // if error, return default settings
-    let data = match data {
-        Ok(data) => data,
-        Err(_) => SettingsData::new(),
-    };
-
-    Ok(data)
+    Ok(get_settings_data(&app))
 }
 
 #[tauri::command]
 #[specta::specta]
 pub async fn save_settings(app: tauri::AppHandle, settings: SettingsData) -> Result<(), String> {
-    let store = app
-        .store("settings.json")
-        .expect("Failed to get settings from store");
-    store.set("settings", serde_json::to_value(settings.clone()).unwrap());
-    // println!("Set settings: {:?}", settings);
-    app.emit("settings-changed", true).unwrap();
+    set_settings_data(&app, settings);
     Ok(())
 }
 
 #[tauri::command]
 #[specta::specta]
 pub async fn reset_settings(app: tauri::AppHandle) -> Result<(), String> {
-    let store = app
-        .store("settings.json")
-        .expect("Failed to get settings from store");
-    store.set(SETTINGS_KEY, json!(SettingsData::new()));
-    app.emit("settings-changed", true).unwrap();
+    set_settings_data(&app, SettingsData::new());
     Ok(())
 }
 
 #[tauri::command]
 #[specta::specta]
 pub async fn reset_profile(app: tauri::AppHandle, profile_id: u32) -> Result<(), String> {
-    let store = app
-        .store("settings.json")
-        .expect("Failed to get settings from store");
-    if !store.has(SETTINGS_KEY) {
-        return Ok(());
-    }
-    let settings_value = store
-        .get(SETTINGS_KEY)
-        .expect("Failed to get value from store");
-    let mut settings: SettingsData = serde_json::from_value(settings_value).unwrap();
+    let mut settings = get_settings_data(&app);
     let profile_idx = settings.profiles.iter().position(|p| p.id == profile_id);
     if profile_idx.is_none() {
         return Err("Profile not found".to_string());
     }
     let profile = settings.profiles[profile_idx.unwrap()].clone();
     settings.profiles[profile_idx.unwrap()] = ProfileData::new_params(profile_id, profile.name);
-    store.set(SETTINGS_KEY, json!(settings));
-    app.emit("settings-changed", true).unwrap();
+    set_settings_data(&app, settings);
     Ok(())
 }
 
@@ -161,39 +124,20 @@ pub async fn delete_profile(app: tauri::AppHandle, profile_id: u32) -> Result<()
     if profile_id == 0 {
         return Err("Cannot delete default profile".to_string());
     }
-    let store = app
-        .store("settings.json")
-        .expect("Failed to get settings from store");
-    if !store.has(SETTINGS_KEY) {
-        return Ok(());
-    }
-    let settings_value = store
-        .get(SETTINGS_KEY)
-        .expect("Failed to get value from store");
-    let mut settings: SettingsData = serde_json::from_value(settings_value).unwrap();
-    let profile_idx = settings.profiles.iter().position(|p| p.id == profile_id);
-    if profile_idx.is_none() {
-        return Err("Profile not found".to_string());
-    }
-    settings.profiles.remove(profile_idx.unwrap());
-    store.set(SETTINGS_KEY, json!(settings));
-    app.emit("settings-changed", true).unwrap();
+    let mut settings = get_settings_data(&app);
+    settings
+        .profiles
+        .iter()
+        .position(|p| p.id == profile_id)
+        .and_then(|i| Some(settings.profiles.remove(i)));
+    set_settings_data(&app, settings);
     Ok(())
 }
 
 #[tauri::command]
 #[specta::specta]
 pub async fn add_profile(app: tauri::AppHandle, mut name: String) -> Result<(), String> {
-    let store = app
-        .store("settings.json")
-        .expect("Failed to get settings from store");
-    if !store.has(SETTINGS_KEY) {
-        return Ok(());
-    }
-    let settings_value = store
-        .get(SETTINGS_KEY)
-        .expect("Failed to get value from store");
-    let mut settings: SettingsData = serde_json::from_value(settings_value).unwrap();
+    let mut settings = get_settings_data(&app);
     let profile_idx = settings.profiles.iter().position(|p| p.name == name);
     if profile_idx.is_some() {
         name = format!("{} ({})", name, profile_idx.unwrap() + 1);
@@ -202,7 +146,35 @@ pub async fn add_profile(app: tauri::AppHandle, mut name: String) -> Result<(), 
     settings
         .profiles
         .push(ProfileData::new_params(highest_id + 1, name));
-    store.set(SETTINGS_KEY, json!(settings));
-    app.emit("settings-changed", true).unwrap();
+    set_settings_data(&app, settings);
     Ok(())
+}
+
+fn get_store(app: &tauri::AppHandle) -> Arc<Store<Wry>> {
+    app.store("settings.json")
+        .expect("Failed to get settings from store")
+}
+
+pub fn get_settings_data(app: &tauri::AppHandle) -> SettingsData {
+    let store = get_store(app);
+    let settings: Option<SettingsData> = store
+        .get(SETTINGS_KEY)
+        .and_then(|v| serde_json::from_value(v).ok());
+
+    if settings.is_none() {
+        let settings = SettingsData::new();
+        store.set(SETTINGS_KEY, json!(settings));
+        return settings;
+    }
+
+    settings.unwrap()
+}
+
+fn set_settings_data(app: &tauri::AppHandle, settings: SettingsData) {
+    let store = get_store(app);
+    store.set(
+        SETTINGS_KEY,
+        serde_json::to_value(settings.clone()).unwrap(),
+    );
+    app.emit("settings-changed", true).unwrap();
 }

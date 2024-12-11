@@ -1,3 +1,4 @@
+import { Channel } from "@tauri-apps/api/core";
 import type { Event } from "@tauri-apps/api/event";
 import { type DragDropEvent, getCurrentWebview } from "@tauri-apps/api/webview";
 import { BsArrowDownSquare } from "solid-icons/bs";
@@ -6,14 +7,11 @@ import { Transition } from "solid-transition-group";
 import { commands } from "./bindings";
 import { addFile } from "./store";
 
-// function anyImage(...paths: string[]) {
-//   // for (const path of paths) {
-//   //   if (FILE_TYPES.includes(path.split(".").pop() ?? "")) {
-//   //     return true;
-//   //   }
-//   // }
-//   return true;
-// }
+const onNewFile = new Channel<string>();
+onNewFile.onmessage = (path) => {
+  console.log(`got download event ${path}`);
+  addFile(path);
+};
 
 export default function Dropper() {
   const [showDropper, setShowDropper] = createSignal(false);
@@ -28,14 +26,7 @@ export default function Dropper() {
       } else if (e.payload.type === "drop") {
         setShowDropper(false);
         for (const path of e.payload.paths) {
-          const images = await commands.getAllImages(path);
-          if (images.status === "error") {
-            console.log(images.error);
-            return;
-          }
-          for (const image of images.data) {
-            addFile(image);
-          }
+          commands.getAllImages(path, onNewFile);
         }
       }
     },

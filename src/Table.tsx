@@ -130,7 +130,7 @@ function MyTable() {
             <MyTH class="w-28" field="savings">
               Savings
             </MyTH>
-            <MyTH class="w-24" field="original_size">
+            <MyTH class="w-24" field="originalSize">
               Size
             </MyTH>
           </tr>
@@ -171,7 +171,7 @@ function MyTable() {
                     {(file.savings ?? 0).toFixed(1)}%
                   </Show>
                 </MyTD>
-                <MyTD>{toHumanReadableSize(file.original_size)}</MyTD>
+                <MyTD>{toHumanReadableSize(file.originalSize)}</MyTD>
               </tr>
             )}
           </For>

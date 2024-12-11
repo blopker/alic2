@@ -24,7 +24,7 @@ function newFileEntry(
     file: data.file ?? "",
     status: data.status ?? "Processing",
     size: data.size ?? null,
-    original_size: data.original_size ?? null,
+    originalSize: data.originalSize ?? null,
     ext: data.ext ?? "",
     error: data.error ?? null,
     savings: data.savings ?? null,
@@ -49,14 +49,14 @@ async function addFile(path: string) {
   const update: Partial<FileEntry> = {
     file: fileResult.data.filename,
     ext: fileResult.data.extension,
-    original_size: fileResult.data.size,
+    originalSize: fileResult.data.size,
   };
   file = updateFile(file, update);
 
   file = updateFile(file, { status: "Compressing" });
   const compressResult = await compressImage(getProfileActive(), file);
   if (compressResult.status === "error") {
-    if (compressResult.error.error_type === "NotSmaller") {
+    if (compressResult.error.errorType === "NotSmaller") {
       updateFile(file, {
         error: compressResult.error.error,
         status: "AlreadySmaller",
@@ -67,14 +67,14 @@ async function addFile(path: string) {
     return;
   }
 
-  const out_size = compressResult.data.out_size;
+  const outSize = compressResult.data.outSize;
   let savings = null;
-  if (file.original_size !== null) {
-    savings = ((file.original_size - out_size) / file.original_size) * 100;
+  if (file.originalSize !== null) {
+    savings = ((file.originalSize - outSize) / file.originalSize) * 100;
   }
   file = updateFile(file, {
     status: "Complete",
-    size: out_size,
+    size: outSize,
     savings,
   });
 }
