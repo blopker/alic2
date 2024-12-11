@@ -3,8 +3,10 @@ import { createStore } from "solid-js/store";
 import { type FileEntry, commands } from "./bindings";
 import { compressImage } from "./compress";
 import { getProfileActive } from "./settings/settingsData";
+import { Semaphore } from "./utils";
 
 listen("clear-files", clearFiles);
+const semaphore = new Semaphore(4);
 type ReadonlyFileEntry = Readonly<FileEntry>;
 
 interface Store {
@@ -52,8 +54,16 @@ async function addFile(path: string) {
     originalSize: fileResult.data.size,
   };
   file = updateFile(file, update);
+  await semaphore.acquire();
+  try {
+    await compressFile(file);
+  } finally {
+    semaphore.release();
+  }
+}
 
-  file = updateFile(file, { status: "Compressing" });
+async function compressFile(_file: FileEntry) {
+  let file = updateFile(_file, { status: "Compressing" });
   const compressResult = await compressImage(getProfileActive(), file);
   if (compressResult.status === "error") {
     if (compressResult.error.errorType === "NotSmaller") {

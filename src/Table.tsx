@@ -11,8 +11,8 @@ import { store } from "./store";
 import { testStore } from "./testdata";
 import { toHumanReadableSize } from "./utils";
 
-// const useTestData = false;
-const useTestData = true;
+const useTestData = false;
+// const useTestData = true;
 
 function StatusIcons(props: { status: FileEntryStatus }) {
   return (
