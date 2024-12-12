@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## [2.1.6] - 2024-12-12
+
+
+
 ## [2.1.5] - 2024-12-11
 
 - Added release scripts
