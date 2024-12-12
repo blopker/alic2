@@ -61,7 +61,10 @@ function ProfilePage() {
       </SettingBox>
       <div class="pt-8" />
       <SettingBox title="Resize">
-        <SettingRow title="Resize">
+        <SettingRow
+          title="Resize"
+          helpText="Resize the image to fit the specified dimensions. Images are not made larger, and are not cropped"
+        >
           <SettingsToggle
             value={data().should_resize}
             onChange={(value) => {
@@ -96,7 +99,10 @@ function ProfilePage() {
       </SettingBox>
       <div class="pt-8" />
       <SettingBox title="Output">
-        <SettingRow title="Allow Overwrite">
+        <SettingRow
+          title="Allow Overwrite"
+          helpText="Allow overwriting existing files. Files will only be overwritten if they have the same output name as the input."
+        >
           <SettingsToggle
             value={data().should_overwrite}
             onChange={(value) => {
@@ -116,7 +122,10 @@ function ProfilePage() {
             }}
           />
         </SettingRow>
-        <SettingRow title="Postfix">
+        <SettingRow
+          title="Postfix"
+          helpText="The postfix to add to the file name. Format: image{postfix}.png"
+        >
           <input
             class="w-20 rounded-md border-0 bg-secondary py-1.5 shadow-sm sm:text-sm/6"
             type="text"
@@ -128,7 +137,10 @@ function ProfilePage() {
             }}
           />
         </SettingRow>
-        <SettingRow title="Convert Image">
+        <SettingRow
+          title="Convert Image"
+          helpText="Enable converting files to the specified format."
+        >
           <SettingsToggle
             value={data().should_convert}
             onChange={(value) => {

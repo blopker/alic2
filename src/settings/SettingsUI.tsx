@@ -1,4 +1,6 @@
-import { For, type JSXElement, onMount } from "solid-js";
+import Tooltip from "@corvu/tooltip";
+import { IoHelpCircleOutline } from "solid-icons/io";
+import { For, type JSXElement, Show, onMount } from "solid-js";
 
 function SettingBox(props: { title: string; children: JSXElement }) {
   return (
@@ -11,10 +13,30 @@ function SettingBox(props: { title: string; children: JSXElement }) {
   );
 }
 
-function SettingRow(props: { title: string; children: JSXElement }) {
+function SettingRow(props: {
+  title: string;
+  helpText?: string;
+  children: JSXElement;
+}) {
   return (
     <div class="flex items-center justify-between gap-2">
-      <div>{props.title}</div>
+      <div class="flex items-center gap-1">
+        {props.title}
+        <Show when={props.helpText}>
+          <Tooltip>
+            <Tooltip.Trigger
+              as={IoHelpCircleOutline}
+              size={17}
+              class="inline cursor-help opacity-50"
+            />
+            <Tooltip.Portal>
+              <Tooltip.Content class="max-w-[30rem] border-[1px] border-accent bg-secondary px-2 py-1">
+                {props.helpText}
+              </Tooltip.Content>
+            </Tooltip.Portal>
+          </Tooltip>
+        </Show>
+      </div>
       <div>{props.children}</div>
     </div>
   );
