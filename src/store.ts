@@ -6,7 +6,7 @@ import { getProfileActive } from "./settings/settingsData";
 import { Semaphore } from "./utils";
 
 listen("clear-files", clearFiles);
-const semaphore = new Semaphore(4);
+const semaphore = new Semaphore(navigator.hardwareConcurrency);
 type ReadonlyFileEntry = Readonly<FileEntry>;
 
 interface Store {
