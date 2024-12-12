@@ -1,8 +1,10 @@
+import { useKeyDownEvent } from "@solid-primitives/keyboard";
 import { A, useNavigate } from "@solidjs/router";
 import {
   type Component,
   For,
   type JSXElement,
+  createEffect,
   createMemo,
   createSignal,
 } from "solid-js";
@@ -96,6 +98,13 @@ function GeneralPage() {
 function NewProfilePage() {
   const [newProfileName, setNewProfileName] = createSignal("");
   const navigate = useNavigate();
+  const event = useKeyDownEvent();
+  createEffect(() => {
+    const e = event();
+    if (e && e.key === "Enter") {
+      onOK();
+    }
+  });
   async function onOK() {
     if (newProfileName() === "") {
       return;
