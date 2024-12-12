@@ -5,7 +5,7 @@ import { type ProfileData, type SettingsData, commands } from "../bindings";
 const [settings, setSettings] = createStore<SettingsData>(await getSettings());
 
 listen<boolean>("settings-changed", async (_) => {
-  console.log("settings changed");
+  // console.log("settings changed");
   setSettings(await getSettings());
 });
 
@@ -26,7 +26,7 @@ async function getSettings() {
   if (opt.status === "error") {
     throw new Error(opt.error);
   }
-  console.log(opt.data);
+  // console.log(opt.data);
   return opt.data;
 }
 

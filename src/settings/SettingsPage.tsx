@@ -60,7 +60,9 @@ function SettingsSideBar() {
           </A>
         )}
       </For>
-      <A href="/settings/newprofile">New Profile...</A>
+      <A activeClass="font-bold" href="/settings/newprofile">
+        New Profile...
+      </A>
     </div>
   );
 }
@@ -69,17 +71,6 @@ function GeneralPage() {
   return (
     <div>
       <h1 class="pb-4 text-left font-bold text-xl">General</h1>
-      {/* <SettingBox title="Interface">
-        <SettingRow title="Theme">
-          <SettingsSelect
-            class="w-40"
-            value={settings.theme}
-            onChange={(theme) => setTheme(theme as ThemeKind)}
-            options={themeKinds}
-          />
-        </SettingRow>
-      </SettingBox>
-      <div class="pt-8" /> */}
       <SettingBox title="Settings">
         <SettingRow title="Reset All Settings">
           <button

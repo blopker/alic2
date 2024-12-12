@@ -3,7 +3,7 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { FaSolidXmark } from "solid-icons/fa";
 import { VsAdd, VsSettings } from "solid-icons/vs";
 import { type JSXElement, Show, onCleanup } from "solid-js";
-import { commands } from "./bindings";
+import { type ProfileData, commands } from "./bindings";
 import { FILE_TYPES } from "./constants";
 import { SettingsSelect } from "./settings/SettingsUI";
 import {
@@ -15,7 +15,6 @@ import { addFile, clearFiles, store } from "./store";
 import { toHumanReadableSize } from "./utils";
 
 async function openFile() {
-  console.log("open file");
   const file = await open({
     multiple: true,
     directory: false,
@@ -26,7 +25,6 @@ async function openFile() {
       },
     ],
   });
-  console.log(file);
   if (!file) {
     return;
   }
@@ -42,6 +40,20 @@ export default function BottomBar() {
   onCleanup(async () => {
     (await unlisten)();
   });
+  const options = () => {
+    const options: Array<{ label: string; value: ProfileData | null }> =
+      settings.profiles.map((p) => {
+        return {
+          label: p.name,
+          value: p,
+        };
+      });
+    options.push({
+      label: "New Profile...",
+      value: null,
+    });
+    return options;
+  };
   return (
     <div class="right-0 left-0 flex h-10 items-center justify-between gap-2 border-accent border-t-[1px] bg-secondary px-2">
       <AddButton />
@@ -51,13 +63,19 @@ export default function BottomBar() {
         value={getProfileActive().name}
         bgColor="bg-primary"
         class="w-40"
-        onChange={(value) => {
-          const profile = settings.profiles.find((p) => p.name === value);
+        onChange={(label) => {
+          const option = options().find((o) => o.label === label);
+          if (option?.value === null) {
+            commands.openSettingsWindow("/settings/newprofile");
+            setProfileActive(getProfileActive().id);
+            return;
+          }
+          const profile = option?.value;
           if (profile) {
             setProfileActive(profile.id);
           }
         }}
-        options={settings.profiles.map((p) => p.name)}
+        options={options().map((e) => e.label)}
       />
       <SettingsButton />
       <ClearButton />
@@ -86,7 +104,7 @@ function ClearButton() {
 }
 
 async function settingsWindow() {
-  await commands.openSettingsWindow();
+  await commands.openSettingsWindow(null);
 }
 
 function StatusText() {

@@ -11,11 +11,11 @@ use tauri_specta::{collect_commands, Builder};
 
 #[tauri::command]
 #[specta::specta]
-async fn open_settings_window(app: tauri::AppHandle) {
-    _open_settings_window(&app);
+async fn open_settings_window(app: tauri::AppHandle, path: Option<String>) {
+    _open_settings_window(&app, path);
 }
 
-fn _open_settings_window(app: &tauri::AppHandle) {
+fn _open_settings_window(app: &tauri::AppHandle, path: Option<String>) {
     let window_label = "settings";
     let config = &app
         .config()
@@ -24,15 +24,22 @@ fn _open_settings_window(app: &tauri::AppHandle) {
         .iter()
         .find(|w| w.label == window_label)
         .unwrap();
-    if let Some(window) = app.get_webview_window(window_label) {
+    let mut window = if let Some(window) = app.get_webview_window(window_label) {
         // If the window already exists, bring it to the front
         window.show().unwrap();
+        window
+        // window.navigate(url)
     } else {
         // If the window does not exist, create it
         tauri::WebviewWindowBuilder::from_config(app, config)
             .unwrap()
             .build()
-            .unwrap();
+            .unwrap()
+    };
+    if path.is_some() {
+        let mut url = window.url().unwrap();
+        url.set_fragment(Some(path.unwrap().as_str()));
+        window.navigate(url).unwrap();
     }
 }
 
@@ -90,6 +97,13 @@ pub fn run() {
                     true,
                     Some("CmdOrCtrl+,"),
                 )?)
+                .item(&MenuItem::with_id(
+                    app,
+                    "newprofile",
+                    "New Profile...",
+                    true,
+                    None::<&str>,
+                )?)
                 .separator()
                 .services()
                 .separator()
@@ -120,20 +134,20 @@ pub fn run() {
             menu.append(&file_submenu)?;
             Ok(menu)
         })
-        .on_menu_event(|app, event| {
-            println!("{:?}", event);
-            match event.id().0.as_str() {
-                "settings" => {
-                    _open_settings_window(app);
-                }
-                "open" => {
-                    app.emit("open-file", ()).unwrap();
-                }
-                "clear" => {
-                    app.emit("clear-files", ()).unwrap();
-                }
-                _ => {}
+        .on_menu_event(|app, event| match event.id().0.as_str() {
+            "settings" => {
+                _open_settings_window(app, None);
             }
+            "newprofile" => {
+                _open_settings_window(app, Some("/settings/newprofile".to_string()));
+            }
+            "open" => {
+                app.emit("open-file", ()).unwrap();
+            }
+            "clear" => {
+                app.emit("clear-files", ()).unwrap();
+            }
+            _ => {}
         })
         .invoke_handler(builder.invoke_handler())
         .setup(move |app| {

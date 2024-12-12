@@ -5,8 +5,8 @@
 
 
 export const commands = {
-async openSettingsWindow() : Promise<void> {
-    await TAURI_INVOKE("open_settings_window");
+async openSettingsWindow(path: string | null) : Promise<void> {
+    await TAURI_INVOKE("open_settings_window", { path });
 },
 async processImg(parameters: ProfileData, file: FileEntry) : Promise<Result<CompressResult, CompressError>> {
     try {
