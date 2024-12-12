@@ -1,4 +1,4 @@
-import "../App.css";
+import { useNavigate, useParams } from "@solidjs/router";
 import type { ImageType } from "../bindings";
 import {
   SettingBox,
@@ -10,17 +10,21 @@ import { deleteProfile, settings, updateProfile } from "./settingsData";
 
 const imageTypes: ImageType[] = ["JPEG", "PNG", "WEBP", "GIF", "TIFF"];
 
-function ProfilePage(props: { id: number; onDelete: () => void }) {
+function ProfilePage() {
+  const navigate = useNavigate();
+  const params = useParams();
   const data = () => {
-    const d = settings.profiles.find((p) => p.id === props.id);
+    const d = settings.profiles.find(
+      (p) => p.id.toString() === params.profileid,
+    );
     if (!d) {
-      throw new Error("Profile not found");
+      throw new Error(`Profile not found: ${params.profileid}`);
     }
     return d;
   };
   return (
     <div>
-      <h1 class="pb-4 text-left font-bold text-xl">{data().name}</h1>
+      <h1 class="pb-4 text-left font-bold text-xl">Profile: {data().name}</h1>
       <SettingBox title="Quality">
         <SettingRow title="JPEG Quality">
           <QualitySlider
@@ -114,7 +118,7 @@ function ProfilePage(props: { id: number; onDelete: () => void }) {
         </SettingRow>
         <SettingRow title="Postfix">
           <input
-            class="w-20 rounded-md border-0 bg-primary py-1.5 shadow-sm sm:text-sm/6"
+            class="w-20 rounded-md border-0 bg-secondary py-1.5 shadow-sm sm:text-sm/6"
             type="text"
             value={data().postfix}
             onInput={(e) => {
@@ -174,7 +178,7 @@ function ProfilePage(props: { id: number; onDelete: () => void }) {
             disabled={data().id === 0}
             onClick={() => {
               deleteProfile(data().id);
-              props.onDelete();
+              navigate("/settings");
             }}
             type="button"
             class="rounded bg-red-500 px-4 font-bold text-white hover:bg-red-700 disabled:opacity-50 disabled:hover:bg-red-500"
@@ -193,7 +197,7 @@ function NumberInput(props: {
 }) {
   return (
     <input
-      class="w-20 rounded-md border-0 bg-primary py-1.5 shadow-sm sm:text-sm/6"
+      class="w-20 rounded-md border-0 bg-secondary py-1.5 shadow-sm sm:text-sm/6"
       type="text"
       min="1"
       value={props.value}

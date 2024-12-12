@@ -49,6 +49,7 @@ export default function BottomBar() {
       <span class="grow" />
       <SettingsSelect
         value={getProfileActive().name}
+        bgColor="bg-primary"
         class="w-40"
         onChange={(value) => {
           const profile = settings.profiles.find((p) => p.name === value);

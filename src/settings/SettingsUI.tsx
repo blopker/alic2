@@ -1,5 +1,4 @@
 import { For, type JSXElement, onMount } from "solid-js";
-import "../App.css";
 
 function SettingBox(props: { title: string; children: JSXElement }) {
   return (
@@ -54,11 +53,17 @@ function SettingsSelect(props: {
   value: string;
   onChange: (value: string) => void;
   options: string[];
+  bgColor?: "bg-accent" | "bg-primary";
   class?: string;
 }) {
   return (
     <select
-      class={`${props.class} rounded-md border-0 bg-primary py-1.5 shadow-sm sm:text-sm/6`}
+      class={`${props.class} rounded-md border-0 py-1.5 shadow-sm sm:text-sm/6`}
+      classList={{
+        "bg-secondary": !props.bgColor,
+        "bg-accent": props.bgColor === "bg-accent",
+        "bg-primary": props.bgColor === "bg-primary",
+      }}
       value={props.value}
       onChange={(e) => {
         props.onChange(e.target.value);
@@ -73,21 +78,10 @@ function SettingsSelect(props: {
   );
 }
 
-function SettingsModal(props: { title: string; children: JSXElement }) {
-  return (
-    <div class="fixed top-0 left-0 z-50 flex h-full w-full items-center justify-center bg-black bg-opacity-50 transition-all">
-      <div class="w-full max-w-sm rounded-md bg-secondary p-4">
-        <div class="pb-4 font-bold text-xl">{props.title}</div>
-        {props.children}
-      </div>
-    </div>
-  );
-}
-
 function SettingsInput(props: {
   label: string;
   value: string;
-  class: string;
+  class?: string;
   placeholder?: string;
   autoFocus?: boolean;
   onChange: (value: string) => void;
@@ -103,7 +97,7 @@ function SettingsInput(props: {
       ref={inputRef}
       placeholder={props.placeholder}
       autofocus={props.autoFocus}
-      class={`${props.class} rounded-md border-0 bg-primary py-1.5 shadow-sm sm:text-sm/6`}
+      class={`${props.class} rounded-md border-0 bg-secondary py-1.5 shadow-sm sm:text-sm/6`}
       type="text"
       value={props.value}
       onInput={(e) => {
@@ -118,6 +112,5 @@ export {
   SettingRow,
   SettingsToggle,
   SettingsSelect,
-  SettingsModal,
   SettingsInput,
 };

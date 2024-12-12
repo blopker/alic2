@@ -1,4 +1,3 @@
-import "./App.css";
 import { onOpenUrl } from "@tauri-apps/plugin-deep-link";
 import BottomBar from "./BottomBar";
 import Dropper from "./Dropper";

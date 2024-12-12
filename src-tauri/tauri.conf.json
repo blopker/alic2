@@ -34,7 +34,7 @@
         "minWidth": 600,
         "resizable": true,
         "title": "Alic Settings",
-        "url": "index.html?window=settings",
+        "url": "index.html#/settings",
         "width": 600
       }
     ],

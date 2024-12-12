@@ -95,8 +95,6 @@ function updateFile(
 ): ReadonlyFileEntry {
   const newFile: ReadonlyFileEntry = { ...file, ...update };
   setStore("files", (f) => f.path === file.path, newFile);
-  // hack to make the table update
-  setStore("files", [...store.files]);
   return newFile;
 }
 
