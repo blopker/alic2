@@ -96,6 +96,12 @@ function updateVersion(type: "major" | "minor" | "patch") {
   packageJson.version = newVersion;
   fs.writeFileSync(packagePath, `${JSON.stringify(packageJson, null, 2)}\n`);
 
+  // Update tauri.conf.json
+  const tauriConfPath = "src-tauri/tauri.conf.json";
+  const tauriConf = JSON.parse(fs.readFileSync(tauriConfPath, "utf8"));
+  tauriConf.version = newVersion;
+  fs.writeFileSync(tauriConfPath, `${JSON.stringify(tauriConf, null, 2)}\n`);
+
   return newVersion;
 }
 
