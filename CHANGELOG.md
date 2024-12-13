@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Update deps
+- Add help text
+
 ## [2.1.6] - 2024-12-12
 
 - More profile stuff
