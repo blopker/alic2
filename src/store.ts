@@ -63,8 +63,8 @@ async function addFile(path: string) {
     originalSize: fileResult.data.size,
   };
   file = updateFile(file, update);
-  syncSemaphore();
   await semaphore.acquire();
+  syncSemaphore();
   try {
     await compressFile(file);
   } finally {
@@ -109,6 +109,7 @@ function updateFile(
 }
 
 function clearFiles() {
+  semaphore.cancel();
   setStore("files", []);
 }
 

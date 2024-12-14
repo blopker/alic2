@@ -1,6 +1,5 @@
 import { useKeyDownEvent } from "@solid-primitives/keyboard";
 import { A, useNavigate } from "@solidjs/router";
-import { ask } from "@tauri-apps/plugin-dialog";
 import {
   type Component,
   For,

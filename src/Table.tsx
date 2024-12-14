@@ -14,6 +14,14 @@ import { toHumanReadableSize } from "./utils";
 const useTestData = false;
 // const useTestData = true;
 
+const statusOrder: Array<FileEntryStatus> = [
+  "Compressing",
+  "Processing",
+  "Complete",
+  "AlreadySmaller",
+  "Error",
+];
+
 function StatusIcons(props: { status: FileEntryStatus }) {
   return (
     <Switch>
@@ -39,7 +47,7 @@ function StatusIcons(props: { status: FileEntryStatus }) {
 function MyTable() {
   // Table with columns of status, file, savings, size
   const [sortField, setSortField] = createSignal<keyof FileEntry | null>();
-  const [sortDirection, setSortDirection] = createSignal("asc");
+  const [sortDirection, setSortDirection] = createSignal<"asc" | "desc">("asc");
   const SortIcon = (props: { field: string }) => (
     <span>
       <Switch>
@@ -102,8 +110,12 @@ function MyTable() {
       return files;
     }
     return files.sort((a, b) => {
-      const aValue = a[field] ?? "";
-      const bValue = b[field] ?? "";
+      let aValue = a[field] ?? "";
+      let bValue = b[field] ?? "";
+      if (field === "status") {
+        aValue = statusOrder.indexOf(a.status);
+        bValue = statusOrder.indexOf(b.status);
+      }
       if (aValue < bValue) return sortDirection() === "asc" ? -1 : 1;
       if (aValue > bValue) return sortDirection() === "asc" ? 1 : -1;
       return 0;

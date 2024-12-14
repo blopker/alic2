@@ -158,7 +158,7 @@ pub async fn process_img(
     let original_size = file.original_size.expect("Image size needs to be set") as f64;
 
     if !parameters.should_convert && temp_size > original_size * 0.95 {
-        fs::remove_file(temp_path).expect("Cannot delete temp file");
+        let _ = fs::remove_file(temp_path);
         return Err(CompressError {
             error: "Image cannot be compressed further.".to_string(),
             error_type: CompressErrorType::NotSmaller,
@@ -495,8 +495,6 @@ fn is_image(path: &Path) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use std::mem;
-
     use super::*;
 
     #[test]

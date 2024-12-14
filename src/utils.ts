@@ -24,15 +24,23 @@ class Semaphore {
     this.running++;
   }
 
+  cancel(): void {
+    this.queue = [];
+  }
+
   release(): void {
     this.running--;
     if (this.running < 0) {
       this.running = 0;
     }
-    const next = this.queue.shift();
-    if (next) {
-      this.running++;
-      next();
+    while (this.running < this.maxConcurrent) {
+      const next = this.queue.shift();
+      if (next) {
+        this.running++;
+        next();
+      } else {
+        break;
+      }
     }
   }
 }
