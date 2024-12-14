@@ -1,9 +1,11 @@
 import { useNavigate, useParams } from "@solidjs/router";
 import { type ImageType, commands } from "../bindings";
+import { confirmModal } from "./ConfirmModal";
 import {
   SettingBox,
   SettingRow,
   SettingsInput,
+  SettingsNumberInput,
   SettingsSelect,
   SettingsToggle,
 } from "./SettingsUI";
@@ -76,7 +78,7 @@ function ProfilePage() {
           />
         </SettingRow>
         <SettingRow title="Resize Width">
-          <NumberInput
+          <SettingsNumberInput
             value={data().resize_width}
             onChange={(value) => {
               updateProfile(data().id, {
@@ -87,7 +89,7 @@ function ProfilePage() {
           <span class="pl-2">px</span>
         </SettingRow>
         <SettingRow title="Resize Height">
-          <NumberInput
+          <SettingsNumberInput
             value={data().resize_height}
             onChange={(value) => {
               updateProfile(data().id, {
@@ -178,7 +180,12 @@ function ProfilePage() {
         <SettingRow title="Reset">
           <button
             onClick={() => {
-              commands.resetProfile(data().id);
+              confirmModal({
+                onConfirm: () => {
+                  commands.resetProfile(data().id);
+                },
+                text: "Are you sure you want to reset this profile?",
+              });
             }}
             type="button"
             class="rounded bg-red-500 px-4 font-bold text-white hover:bg-red-700"
@@ -190,8 +197,13 @@ function ProfilePage() {
           <button
             disabled={data().id === 0}
             onClick={() => {
-              deleteProfile(data().id);
-              navigate("/settings");
+              confirmModal({
+                onConfirm: () => {
+                  deleteProfile(data().id);
+                  navigate("/settings");
+                },
+                text: "Are you sure you want to delete this profile?",
+              });
             }}
             type="button"
             class="rounded bg-red-500 px-4 font-bold text-white hover:bg-red-700 disabled:opacity-50 disabled:hover:bg-red-500"
@@ -201,27 +213,6 @@ function ProfilePage() {
         </SettingRow>
       </SettingBox>
     </div>
-  );
-}
-
-function NumberInput(props: {
-  value: number;
-  onChange: (value: number) => void;
-}) {
-  return (
-    <input
-      class="w-20 rounded-md border-0 bg-secondary py-1.5 shadow-sm sm:text-sm/6"
-      type="text"
-      min="1"
-      value={props.value}
-      onInput={(e) => {
-        const value = Number.parseInt(e.target.value);
-        if (Number.isNaN(value)) {
-          return;
-        }
-        props.onChange(value);
-      }}
-    />
   );
 }
 

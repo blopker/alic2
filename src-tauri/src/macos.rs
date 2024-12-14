@@ -1,3 +1,5 @@
+use std::mem;
+extern crate libc;
 use tauri_plugin_shell::ShellExt;
 
 #[tauri::command]
@@ -16,4 +18,21 @@ pub async fn open_finder_at_path(path: String, app_handle: tauri::AppHandle) -> 
         println!("Exit with code: {}", output.status.code().unwrap());
     }
     Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn get_cpu_count() -> i32 {
+    unsafe {
+        let mut num_cores = 0;
+        let mut len = mem::size_of::<libc::size_t>() as libc::size_t;
+        libc::sysctlbyname(
+            "hw.ncpu\0".as_ptr() as *const i8,
+            &mut num_cores as *mut _ as *mut libc::c_void,
+            &mut len,
+            core::ptr::null_mut(),
+            0,
+        );
+        num_cores
+    }
 }

@@ -87,6 +87,7 @@ pub fn run() {
         settings::delete_profile,
         settings::add_profile,
         macos::open_finder_at_path,
+        macos::get_cpu_count,
     ]);
 
     #[cfg(debug_assertions)] // <- Only export on non-release builds

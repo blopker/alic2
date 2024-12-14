@@ -87,6 +87,9 @@ async openFinderAtPath(path: string) : Promise<Result<null, string>> {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
+},
+async getCpuCount() : Promise<number> {
+    return await TAURI_INVOKE("get_cpu_count");
 }
 }
 
@@ -108,7 +111,7 @@ export type FileEntryStatus = "Processing" | "Compressing" | "Complete" | "Alrea
 export type FileInfoResult = { size: number; extension: string; filename: string }
 export type ImageType = "JPEG" | "PNG" | "WEBP" | "GIF" | "TIFF"
 export type ProfileData = { name: string; id: number; active: boolean; should_resize: boolean; should_convert: boolean; should_overwrite: boolean; add_posfix?: boolean; convert_extension: ImageType; postfix: string; resize_width: number; resize_height: number; jpeg_quality: number; png_quality: number; webp_quality: number; gif_quality: number }
-export type SettingsData = { version: number; theme: ThemeKind; profiles: ProfileData[] }
+export type SettingsData = { version: number; theme: ThemeKind; threads?: number; profiles: ProfileData[] }
 export type ThemeKind = "Light" | "Dark" | "System"
 
 /** tauri-specta globals **/

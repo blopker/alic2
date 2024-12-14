@@ -14,6 +14,8 @@ const SETTINGS_KEY: &str = "settings";
 pub struct SettingsData {
     pub version: u32,
     pub theme: ThemeKind,
+    #[serde(default)]
+    pub threads: i32,
     pub profiles: Vec<ProfileData>,
 }
 
@@ -29,6 +31,7 @@ impl SettingsData {
         Self {
             version: 1,
             theme: ThemeKind::System,
+            threads: 0,
             profiles: vec![ProfileData::new()],
         }
     }

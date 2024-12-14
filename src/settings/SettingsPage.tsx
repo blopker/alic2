@@ -1,5 +1,6 @@
 import { useKeyDownEvent } from "@solid-primitives/keyboard";
 import { A, useNavigate } from "@solidjs/router";
+import { ask } from "@tauri-apps/plugin-dialog";
 import {
   type Component,
   For,
@@ -8,8 +9,19 @@ import {
   createMemo,
   createSignal,
 } from "solid-js";
-import { SettingBox, SettingRow, SettingsInput } from "./SettingsUI";
-import { createProfile, resetSettings, settings } from "./settingsData";
+import { ConfirmModal, confirmModal } from "./ConfirmModal";
+import {
+  SettingBox,
+  SettingRow,
+  SettingsInput,
+  SettingsNumberInput,
+} from "./SettingsUI";
+import {
+  createProfile,
+  resetSettings,
+  setThreads,
+  settings,
+} from "./settingsData";
 
 interface SettingsPageData {
   kind: string;
@@ -27,6 +39,7 @@ const [settingsPages, _] = createSignal<SettingsPageData[]>([
 function Settings(props: { children?: JSXElement }) {
   return (
     <main class="flex h-screen w-full justify-between bg-secondary">
+      <ConfirmModal />
       <div class="w-40 border-accent border-r-[1px]">
         <SettingsSideBar />
       </div>
@@ -71,10 +84,26 @@ function GeneralPage() {
   return (
     <div>
       <h1 class="pb-4 text-left font-bold text-xl">General</h1>
-      <SettingBox title="Settings">
+      <SettingBox title="">
+        <SettingRow
+          title="Threads"
+          helpText="Number of images to process in parallel. Setting this to 0 will use all available CPUs."
+        >
+          <SettingsNumberInput
+            value={settings.threads || 0}
+            onChange={(value) => {
+              setThreads(value);
+            }}
+          />
+        </SettingRow>
         <SettingRow title="Reset All Settings">
           <button
-            onClick={resetSettings}
+            onClick={async () => {
+              confirmModal({
+                text: "Are you sure you want to reset all settings?",
+                onConfirm: resetSettings,
+              });
+            }}
             type="button"
             class="rounded-sm bg-red-500 px-4 font-bold text-white hover:bg-red-700"
           >

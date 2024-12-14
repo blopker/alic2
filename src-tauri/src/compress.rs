@@ -495,6 +495,8 @@ fn is_image(path: &Path) -> bool {
 
 #[cfg(test)]
 mod tests {
+    use std::mem;
+
     use super::*;
 
     #[test]
@@ -564,5 +566,21 @@ mod tests {
     //     let result = process_img(parameters).await;
     //     assert_eq!(result.result, "Success".to_string());
     //     assert_eq!(result.out_path, "test/test.min.png".to_string());
+    // }
+    // #[test]
+    // fn test_garbage() {
+    //     unsafe {
+    //         let mut num_cores = 0;
+    //         let mut len = mem::size_of::<libc::size_t>() as libc::size_t;
+    //         libc::sysctlbyname(
+    //             "hw.ncpu\0".as_ptr() as *const i8,
+    //             &mut num_cores as *mut _ as *mut libc::c_void,
+    //             &mut len,
+    //             core::ptr::null_mut(),
+    //             0,
+    //         );
+    //         println!("Number of cores: {}", num_cores);
+    //     }
+    //     assert!(false);
     // }
 }

@@ -1,6 +1,31 @@
 import Tooltip from "@corvu/tooltip";
+
 import { IoHelpCircleOutline } from "solid-icons/io";
-import { For, type JSXElement, Show, onMount } from "solid-js";
+import { For, type JSXElement, type Ref, Show, onMount } from "solid-js";
+
+function SettingsButton(props: {
+  disabled?: boolean;
+  onClick: () => void;
+  children: JSXElement;
+  style?: "secondary" | "primary";
+  ref?: Ref<HTMLButtonElement>;
+}) {
+  return (
+    <button
+      ref={props.ref}
+      disabled={props.disabled === true}
+      onClick={props.onClick}
+      type="button"
+      classList={{
+        "bg-indigo-600": props.style === undefined,
+        "bg-accent": props.style === "secondary",
+      }}
+      class="col-start-2 inline-flex w-full justify-center rounded-md px-3 py-2 font-semibold text-sm text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-indigo-600 focus-visible:outline-offset-2"
+    >
+      {props.children}
+    </button>
+  );
+}
 
 function SettingBox(props: { title: string; children: JSXElement }) {
   return (
@@ -129,10 +154,33 @@ function SettingsInput(props: {
   );
 }
 
+function SettingsNumberInput(props: {
+  value: number;
+  onChange: (value: number) => void;
+}) {
+  return (
+    <input
+      class="w-20 rounded-md border-0 bg-secondary py-1.5 shadow-sm sm:text-sm/6"
+      type="text"
+      min="1"
+      value={props.value}
+      onInput={(e) => {
+        const value = Number.parseInt(e.target.value);
+        if (Number.isNaN(value)) {
+          return;
+        }
+        props.onChange(value);
+      }}
+    />
+  );
+}
+
 export {
   SettingBox,
   SettingRow,
   SettingsToggle,
   SettingsSelect,
   SettingsInput,
+  SettingsNumberInput,
+  SettingsButton,
 };

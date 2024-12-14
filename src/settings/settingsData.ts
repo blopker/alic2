@@ -40,8 +40,12 @@ async function saveSettings() {
 
 const debounceSaveSettings = debounce(saveSettings, 500);
 
-function setTheme(theme: SettingsData["theme"]) {
-  setSettings("theme", theme);
+function setThreads(threads: SettingsData["threads"]) {
+  let _threads = threads || 0;
+  if (_threads < 0) {
+    _threads = 0;
+  }
+  setSettings("threads", threads);
   saveSettings();
 }
 
@@ -91,7 +95,7 @@ function getProfileActive() {
 
 export {
   settings,
-  setTheme,
+  setThreads,
   resetSettings,
   updateProfile,
   deleteProfile,

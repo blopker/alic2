@@ -38,6 +38,7 @@ version = "2.1.6"
 dependencies = [
  "image",
  "infer",
+ "libc",
  "libcaesium",
  "muda",
  "serde",
