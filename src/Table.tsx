@@ -164,7 +164,12 @@ function MyTable() {
                     </Show>
                   </MyTD>
                   <MyTD class="w-24">
-                    {toHumanReadableSize(file.originalSize)}
+                    <Show
+                      when={file.size}
+                      fallback={toHumanReadableSize(file.originalSize)}
+                    >
+                      {toHumanReadableSize(file.size)}
+                    </Show>
                   </MyTD>
                 </tr>
               )}
