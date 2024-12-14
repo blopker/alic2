@@ -75,7 +75,7 @@ impl ProfileData {
         }
     }
 
-    pub fn new_params(id: u32, name: String) -> Self {
+    pub fn new_with_params(id: u32, name: String) -> Self {
         let mut this = Self::new();
         this.id = id;
         this.name = name;
@@ -113,7 +113,8 @@ pub async fn reset_profile(app: tauri::AppHandle, profile_id: u32) -> Result<(),
         return Err("Profile not found".to_string());
     }
     let profile = settings.profiles[profile_idx.unwrap()].clone();
-    settings.profiles[profile_idx.unwrap()] = ProfileData::new_params(profile_id, profile.name);
+    settings.profiles[profile_idx.unwrap()] =
+        ProfileData::new_with_params(profile_id, profile.name);
     set_settings_data(&app, settings);
     Ok(())
 }
@@ -145,7 +146,7 @@ pub async fn add_profile(app: tauri::AppHandle, mut name: String) -> Result<(), 
     let highest_id = settings.profiles.iter().max_by_key(|p| p.id).unwrap().id;
     settings
         .profiles
-        .push(ProfileData::new_params(highest_id + 1, name));
+        .push(ProfileData::new_with_params(highest_id + 1, name));
     set_settings_data(&app, settings);
     Ok(())
 }

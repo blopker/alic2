@@ -97,10 +97,10 @@ function NewProfilePage() {
     }
   });
   async function onOK() {
-    if (newProfileName() === "") {
+    const name = newProfileName().substring(0, 30);
+    if (name === "") {
       return;
     }
-    const name = newProfileName();
     await createProfile(name);
     setNewProfileName("");
     const newProfile = settings.profiles.find((p) => p.name === name);

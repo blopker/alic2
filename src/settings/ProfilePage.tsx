@@ -1,8 +1,9 @@
 import { useNavigate, useParams } from "@solidjs/router";
-import type { ImageType } from "../bindings";
+import { type ImageType, commands } from "../bindings";
 import {
   SettingBox,
   SettingRow,
+  SettingsInput,
   SettingsSelect,
   SettingsToggle,
 } from "./SettingsUI";
@@ -163,21 +164,21 @@ function ProfilePage() {
       </SettingBox>
       <div class="pt-8" />
       <SettingBox title="Manage">
+        <SettingRow title="Profile Name">
+          <SettingsInput
+            label="Name"
+            value={data().name}
+            onChange={(value) => {
+              if (value.length > 1 && value.length < 30) {
+                updateProfile(data().id, { name: value });
+              }
+            }}
+          />
+        </SettingRow>
         <SettingRow title="Reset">
           <button
             onClick={() => {
-              updateProfile(data().id, {
-                should_resize: false,
-                should_convert: false,
-                should_overwrite: false,
-                postfix: ".min",
-                resize_width: 1000,
-                resize_height: 1000,
-                jpeg_quality: 80,
-                png_quality: 80,
-                webp_quality: 80,
-                gif_quality: 80,
-              });
+              commands.resetProfile(data().id);
             }}
             type="button"
             class="rounded bg-red-500 px-4 font-bold text-white hover:bg-red-700"
