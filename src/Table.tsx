@@ -72,10 +72,10 @@ function MyTable() {
     </th>
   );
 
-  const MyTD = (props: { children: JSXElement }) => {
+  const MyTD = (props: { children: JSXElement; class?: string }) => {
     const [local, others] = splitProps(props, ["children"]);
     return (
-      <td {...others} class="px-2">
+      <td {...others} class={`px-2 ${props.class}`}>
         {local.children}
       </td>
     );
@@ -139,7 +139,7 @@ function MyTable() {
                   class="cursor-default even:bg-secondary hover:bg-accent"
                 >
                   <Tooltip>
-                    <Tooltip.Trigger as={MyTD}>
+                    <Tooltip.Trigger as={MyTD} class="w-12">
                       <StatusIcons status={file.status} />
                     </Tooltip.Trigger>
                     <Tooltip.Portal>
@@ -150,7 +150,6 @@ function MyTable() {
                       </Tooltip.Content>
                     </Tooltip.Portal>
                   </Tooltip>
-
                   <Tooltip>
                     <Tooltip.Trigger as={MyTD}>{file.file}</Tooltip.Trigger>
                     <Tooltip.Portal>
@@ -159,13 +158,14 @@ function MyTable() {
                       </Tooltip.Content>
                     </Tooltip.Portal>
                   </Tooltip>
-
-                  <MyTD>
+                  <MyTD class="w-28">
                     <Show when={file.savings} fallback="?">
                       {(file.savings ?? 0).toFixed(1)}%
                     </Show>
                   </MyTD>
-                  <MyTD>{toHumanReadableSize(file.originalSize)}</MyTD>
+                  <MyTD class="w-24">
+                    {toHumanReadableSize(file.originalSize)}
+                  </MyTD>
                 </tr>
               )}
             </For>
