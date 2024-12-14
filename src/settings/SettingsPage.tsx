@@ -40,7 +40,7 @@ function Settings(props: { children?: JSXElement }) {
   return (
     <main class="flex h-screen w-full justify-between bg-secondary">
       <ConfirmModal />
-      <div class="w-40 border-accent border-r-[1px]">
+      <div class="w-40 overflow-y-auto border-accent border-r-[1px]">
         <SettingsSideBar />
       </div>
       <div class="grow overflow-scroll bg-primary p-4">{props.children}</div>
@@ -65,17 +65,19 @@ function SettingsSideBar() {
           </A>
         )}
       </For>
-      <div class="pt-2 text-sm">Profiles</div>
-      <For each={profilePages()}>
-        {(p) => (
-          <A activeClass="font-bold" href={`/settings/profile/${p.id}`}>
-            {p.title}
-          </A>
-        )}
-      </For>
-      <A activeClass="font-bold" href="/settings/newprofile">
-        New Profile...
-      </A>
+      <div class="opacity-70">Profiles</div>
+      <div class="flex flex-col items-start gap-2 pl-2">
+        <For each={profilePages()}>
+          {(p) => (
+            <A activeClass="font-bold" href={`/settings/profile/${p.id}`}>
+              {p.title}
+            </A>
+          )}
+        </For>
+        <A activeClass="font-bold" href="/settings/newprofile">
+          New Profile...
+        </A>
+      </div>
     </div>
   );
 }

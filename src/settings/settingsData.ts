@@ -66,7 +66,7 @@ function updateProfile(profileid: number, update: Partial<ProfileData>) {
 }
 
 async function deleteProfile(profileid: number) {
-  commands.deleteProfile(profileid);
+  await commands.deleteProfile(profileid);
 }
 
 async function createProfile(name: string) {
