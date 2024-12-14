@@ -7,7 +7,7 @@ use serde;
 use specta::Type;
 use std::fs;
 use std::os::unix::fs::MetadataExt;
-use tauri::ipc::Channel;
+use tauri::Emitter;
 
 use std::path::{Path, PathBuf};
 
@@ -404,22 +404,28 @@ fn remove_extension(path: &Path) -> String {
 
 #[tauri::command]
 #[specta::specta]
-pub async fn get_all_images(path: String, on_event: Channel<String>) {
+pub async fn get_all_images(app: tauri::AppHandle, path: String) -> Result<(), String> {
+    let on_event = |path: String| app.emit("new-file", path).unwrap();
+
     let file = Path::new(&path);
     if !file.exists() {
-        return;
+        return Ok(());
     }
     if file.is_file() {
         if !is_image(&file) {
-            return;
+            return Ok(());
         }
-        on_event.send(path).unwrap();
-        return;
+        on_event(path);
+        return Ok(());
     }
     find_images(path, &on_event);
+    Ok(())
 }
 
-fn find_images<P: AsRef<Path>>(directory: P, on_event: &Channel<String>) {
+fn find_images<P: AsRef<Path>, F>(directory: P, on_event: &F)
+where
+    F: Fn(String),
+{
     let entries = match fs::read_dir(directory) {
         Ok(entries) => entries,
         Err(_) => return,
@@ -433,9 +439,9 @@ fn find_images<P: AsRef<Path>>(directory: P, on_event: &Channel<String>) {
 
         if path.is_dir() {
             // Recursively search subdirectories
-            find_images(&path, &on_event);
+            find_images(&path, on_event);
         } else if is_image(&path) {
-            on_event.send(path.to_string_lossy().to_string()).unwrap();
+            on_event(path.to_string_lossy().to_string());
         }
     }
 }

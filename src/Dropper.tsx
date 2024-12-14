@@ -1,11 +1,14 @@
-import { Channel } from "@tauri-apps/api/core";
-import type { Event } from "@tauri-apps/api/event";
+import { type Event, listen } from "@tauri-apps/api/event";
 import { type DragDropEvent, getCurrentWebview } from "@tauri-apps/api/webview";
 import { BsArrowDownSquare } from "solid-icons/bs";
 import { Show, createSignal, onCleanup } from "solid-js";
 import { Transition } from "solid-transition-group";
 import { commands } from "./bindings";
 import { addFile } from "./store";
+
+listen<string>("new-file", (path) => {
+  addFile(path.payload);
+});
 
 export default function Dropper() {
   const [showDropper, setShowDropper] = createSignal(false);
@@ -20,11 +23,7 @@ export default function Dropper() {
       } else if (e.payload.type === "drop") {
         setShowDropper(false);
         for (const path of e.payload.paths) {
-          const onNewFile = new Channel<string>();
-          onNewFile.onmessage = (path) => {
-            addFile(path);
-          };
-          commands.getAllImages(path, onNewFile);
+          commands.getAllImages(path);
         }
       }
     },

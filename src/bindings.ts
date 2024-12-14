@@ -24,8 +24,13 @@ async getFileInfo(path: string) : Promise<Result<FileInfoResult, string>> {
     else return { status: "error", error: e  as any };
 }
 },
-async getAllImages(path: string, onEvent: TAURI_CHANNEL<string>) : Promise<void> {
-    await TAURI_INVOKE("get_all_images", { path, onEvent });
+async getAllImages(path: string) : Promise<Result<null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_all_images", { path }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 },
 async getSettings() : Promise<Result<SettingsData, string>> {
     try {
@@ -104,7 +109,6 @@ export type FileInfoResult = { size: number; extension: string; filename: string
 export type ImageType = "JPEG" | "PNG" | "WEBP" | "GIF" | "TIFF"
 export type ProfileData = { name: string; id: number; active: boolean; should_resize: boolean; should_convert: boolean; should_overwrite: boolean; add_posfix?: boolean; convert_extension: ImageType; postfix: string; resize_width: number; resize_height: number; jpeg_quality: number; png_quality: number; webp_quality: number; gif_quality: number }
 export type SettingsData = { version: number; theme: ThemeKind; profiles: ProfileData[] }
-export type TAURI_CHANNEL<TSend> = null
 export type ThemeKind = "Light" | "Dark" | "System"
 
 /** tauri-specta globals **/

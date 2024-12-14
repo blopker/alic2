@@ -2,10 +2,13 @@ mod compress;
 mod macos;
 mod settings;
 
+use image;
 use tauri::{
     menu::{AboutMetadataBuilder, Menu, MenuItem, SubmenuBuilder},
     Emitter, Manager,
 };
+
+use tauri_plugin_clipboard_manager::ClipboardExt;
 use tauri_plugin_store::StoreExt;
 use tauri_specta::{collect_commands, Builder};
 
@@ -43,6 +46,33 @@ fn _open_settings_window(app: &tauri::AppHandle, path: Option<String>) {
     }
 }
 
+fn save_clipboard_image(app: &tauri::AppHandle) {
+    // Try reading image
+    let image_result = app.clipboard().read_image();
+    if image_result.is_err() {
+        println!("clip: no image {:?}", image_result);
+        return;
+    }
+    let clip_image = image_result.unwrap();
+
+    // Read filename
+    let text_result = app.clipboard().read_text();
+    if text_result.is_err() {
+        println!("clip: no text {:?}", text_result);
+        return;
+    }
+    let filename = text_result.unwrap();
+    let image = image::RgbaImage::from_raw(
+        clip_image.width(),
+        clip_image.height(),
+        clip_image.rgba().into(),
+    )
+    .unwrap();
+    let path = format!("/Users/blopker/Documents/cliptest/{}", filename);
+    image.save(&path).unwrap();
+    app.emit("new-file", path).unwrap();
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let builder = Builder::<tauri::Wry>::new().commands(collect_commands![
@@ -67,6 +97,7 @@ pub fn run() {
         )
         .expect("Failed to export typescript bindings");
     tauri::Builder::default()
+        .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_single_instance::init(|_app, _args, _cwd| {
             println!("Second instance detected:");
             // println!("App: {:?}", app.cli().matches());
@@ -129,25 +160,37 @@ pub fn run() {
                     true,
                     Some("CmdOrCtrl+D"),
                 )?)
+                .item(&MenuItem::with_id(
+                    app,
+                    "paste",
+                    "Paste Images",
+                    true,
+                    Some("CmdOrCtrl+V"),
+                )?)
                 .close_window()
                 .build()?;
             menu.append(&file_submenu)?;
             Ok(menu)
         })
-        .on_menu_event(|app, event| match event.id().0.as_str() {
-            "settings" => {
-                _open_settings_window(app, None);
-            }
-            "newprofile" => {
-                _open_settings_window(app, Some("/settings/newprofile".to_string()));
-            }
-            "open" => {
-                app.emit("open-file", ()).unwrap();
-            }
-            "clear" => {
-                app.emit("clear-files", ()).unwrap();
-            }
-            _ => {}
+        .on_menu_event(|app, event| {
+            return match event.id().0.as_str() {
+                "settings" => {
+                    _open_settings_window(&app, None);
+                }
+                "newprofile" => {
+                    _open_settings_window(&app, Some("/settings/newprofile".to_string()));
+                }
+                "open" => {
+                    app.emit("open-file", ()).unwrap();
+                }
+                "clear" => {
+                    app.emit("clear-files", ()).unwrap();
+                }
+                "paste" => {
+                    save_clipboard_image(app);
+                }
+                _ => {}
+            };
         })
         .invoke_handler(builder.invoke_handler())
         .setup(move |app| {
