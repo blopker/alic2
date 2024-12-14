@@ -15,6 +15,7 @@ import {
   SettingsButton,
   SettingsInput,
   SettingsNumberInput,
+  SettingsPage,
 } from "./SettingsUI";
 import {
   createProfile,
@@ -43,7 +44,7 @@ function Settings(props: { children?: JSXElement }) {
       <div class="w-40 overflow-y-auto border-accent border-r-[1px]">
         <SettingsSideBar />
       </div>
-      <div class="grow overflow-scroll bg-primary p-4">{props.children}</div>
+      <div class="grow bg-primary">{props.children}</div>
     </main>
   );
 }
@@ -84,8 +85,7 @@ function SettingsSideBar() {
 
 function GeneralPage() {
   return (
-    <div>
-      <h1 class="pb-4 text-left font-bold text-xl">General</h1>
+    <SettingsPage title="General">
       <SettingBox title="">
         <SettingRow
           title="Threads"
@@ -112,7 +112,7 @@ function GeneralPage() {
           </SettingsButton>
         </SettingRow>
       </SettingBox>
-    </div>
+    </SettingsPage>
   );
 }
 
@@ -139,8 +139,7 @@ function NewProfilePage() {
     }
   }
   return (
-    <>
-      <h1 class="pb-4 text-left font-bold text-xl">Create New Profile</h1>
+    <SettingsPage title="Create New Profile">
       <SettingBox title="">
         <SettingRow title="Profile Name">
           <SettingsInput
@@ -153,16 +152,11 @@ function NewProfilePage() {
             }}
           />
         </SettingRow>
-        <button
-          disabled={newProfileName() === ""}
-          onClick={onOK}
-          type="button"
-          class="col-start-2 inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 font-semibold text-sm text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-indigo-600 focus-visible:outline-offset-2"
-        >
+        <SettingsButton disabled={newProfileName() === ""} onClick={onOK}>
           Create
-        </button>
+        </SettingsButton>
       </SettingBox>
-    </>
+    </SettingsPage>
   );
 }
 

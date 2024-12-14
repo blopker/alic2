@@ -8,11 +8,11 @@ function SettingsButton(props: {
   onClick: () => void;
   children: JSXElement;
   style?: "secondary" | "primary" | "danger";
-  ref?: Ref<HTMLButtonElement>;
+  autoFocus?: boolean;
 }) {
   return (
     <button
-      ref={props.ref}
+      autofocus={props.autoFocus === true}
       disabled={props.disabled === true}
       onClick={props.onClick}
       type="button"
@@ -178,6 +178,19 @@ function SettingsNumberInput(props: {
   );
 }
 
+function SettingsPage(props: { title: string; children: JSXElement }) {
+  return (
+    <div class="relative flex flex-col">
+      <div class="h-[50px] p-4">
+        <h1 class="text-left font-bold text-xl">{props.title}</h1>
+      </div>
+      <div class="max-h-[calc(100vh-50px)] grow overflow-y-auto p-4">
+        {props.children}
+      </div>
+    </div>
+  );
+}
+
 export {
   SettingBox,
   SettingRow,
@@ -186,4 +199,5 @@ export {
   SettingsInput,
   SettingsNumberInput,
   SettingsButton,
+  SettingsPage,
 };

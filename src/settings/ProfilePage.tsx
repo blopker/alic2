@@ -7,6 +7,7 @@ import {
   SettingsButton,
   SettingsInput,
   SettingsNumberInput,
+  SettingsPage,
   SettingsSelect,
   SettingsToggle,
 } from "./SettingsUI";
@@ -27,8 +28,7 @@ function ProfilePage() {
     return d;
   };
   return (
-    <div>
-      <h1 class="pb-4 text-left font-bold text-xl">Profile: {data().name}</h1>
+    <SettingsPage title={`Profile | ${data().name}`}>
       <SettingBox title="Quality">
         <SettingRow title="JPEG Quality">
           <QualitySlider
@@ -159,7 +159,9 @@ function ProfilePage() {
             class="w-32"
             value={data().convert_extension}
             onChange={(type) =>
-              updateProfile(data().id, { convert_extension: type as ImageType })
+              updateProfile(data().id, {
+                convert_extension: type as ImageType,
+              })
             }
             options={imageTypes}
           />
@@ -211,7 +213,7 @@ function ProfilePage() {
           </SettingsButton>
         </SettingRow>
       </SettingBox>
-    </div>
+    </SettingsPage>
   );
 }
 
