@@ -8,7 +8,8 @@ import { Semaphore } from "./utils";
 listen("clear-files", clearFiles);
 
 const CPU_COUNT = await commands.getCpuCount();
-const semaphore = new Semaphore(4);
+const semaphore = new Semaphore(0);
+syncSemaphore();
 
 type ReadonlyFileEntry = Readonly<FileEntry>;
 
@@ -21,9 +22,7 @@ const [store, setStore] = createStore<Store>({
 });
 
 function syncSemaphore() {
-  const threads = settings.threads || CPU_COUNT;
-  semaphore.maxConcurrent = threads;
-  console.log(`Settings thread count: ${threads}`);
+  semaphore.maxConcurrent = settings.threads || CPU_COUNT;
 }
 
 function newFileEntry(

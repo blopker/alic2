@@ -73,13 +73,11 @@ function ConfirmModal() {
 }
 
 function confirmModal(opts: Partial<ConfirmOpts>) {
-  console.log("confirming!");
   setConfirmOpts({
     ...defaultConfirmOpts(),
     ...opts,
     show: true,
   });
-  console.log(confirmOpts());
 }
 
 export { ConfirmModal, confirmModal };
