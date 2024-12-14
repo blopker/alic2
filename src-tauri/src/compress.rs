@@ -1,3 +1,5 @@
+use crate::macos;
+
 use super::settings;
 use caesium;
 use caesium::parameters::CSParameters;
@@ -166,7 +168,7 @@ pub async fn process_img(
     }
 
     if out_path == file.path {
-        let res = fs::remove_file(&file.path);
+        let res = macos::trash_file(&file.path);
         if res.is_err() {
             return Err(CompressError {
                 error: res.err().unwrap().to_string(),

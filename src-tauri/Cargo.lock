@@ -41,6 +41,8 @@ dependencies = [
  "libc",
  "libcaesium",
  "muda",
+ "objc2",
+ "objc2-foundation",
  "serde",
  "serde_json",
  "specta",
@@ -1224,9 +1226,9 @@ dependencies = [
 
 [[package]]
 name = "error-code"
-version = "3.3.1"
+version = "3.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a5d9305ccc6942a704f4335694ecd3de2ea531b114ac2d51f5f843750787a92f"
+checksum = "281e452d3bad4005426416cdba5ccfd4f5c1280e10099e21db27f7c1c28347fc"
 
 [[package]]
 name = "event-listener"
