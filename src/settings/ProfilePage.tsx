@@ -4,6 +4,7 @@ import { confirmModal } from "./ConfirmModal";
 import {
   SettingBox,
   SettingRow,
+  SettingsButton,
   SettingsInput,
   SettingsNumberInput,
   SettingsSelect,
@@ -178,7 +179,7 @@ function ProfilePage() {
           />
         </SettingRow>
         <SettingRow title="Reset">
-          <button
+          <SettingsButton
             onClick={() => {
               confirmModal({
                 onConfirm: () => {
@@ -187,14 +188,13 @@ function ProfilePage() {
                 text: "Are you sure you want to reset this profile?",
               });
             }}
-            type="button"
-            class="rounded bg-red-500 px-4 font-bold text-white hover:bg-red-700"
+            style="danger"
           >
             Reset
-          </button>
+          </SettingsButton>
         </SettingRow>
         <SettingRow title="Delete">
-          <button
+          <SettingsButton
             disabled={data().id === 0}
             onClick={() => {
               confirmModal({
@@ -205,11 +205,10 @@ function ProfilePage() {
                 text: "Are you sure you want to delete this profile?",
               });
             }}
-            type="button"
-            class="rounded bg-red-500 px-4 font-bold text-white hover:bg-red-700 disabled:opacity-50 disabled:hover:bg-red-500"
+            style="danger"
           >
             Delete
-          </button>
+          </SettingsButton>
         </SettingRow>
       </SettingBox>
     </div>

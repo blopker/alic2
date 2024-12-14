@@ -12,6 +12,7 @@ import { ConfirmModal, confirmModal } from "./ConfirmModal";
 import {
   SettingBox,
   SettingRow,
+  SettingsButton,
   SettingsInput,
   SettingsNumberInput,
 } from "./SettingsUI";
@@ -86,7 +87,7 @@ function GeneralPage() {
       <SettingBox title="">
         <SettingRow
           title="Threads"
-          helpText="Number of images to process in parallel. Setting this to 0 will use all available CPUs."
+          helpText="Number of images to process in parallel. Setting this to 0 will use all available cores."
         >
           <SettingsNumberInput
             value={settings.threads || 0}
@@ -96,18 +97,17 @@ function GeneralPage() {
           />
         </SettingRow>
         <SettingRow title="Reset All Settings">
-          <button
+          <SettingsButton
             onClick={async () => {
               confirmModal({
                 text: "Are you sure you want to reset all settings?",
                 onConfirm: resetSettings,
               });
             }}
-            type="button"
-            class="rounded-sm bg-red-500 px-4 font-bold text-white hover:bg-red-700"
+            style="danger"
           >
             Reset
-          </button>
+          </SettingsButton>
         </SettingRow>
       </SettingBox>
     </div>
