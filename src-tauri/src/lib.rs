@@ -1,11 +1,13 @@
 mod compress;
+mod events;
 mod macos;
 mod settings;
 
+use events::{emit_add_file, emit_clear_files, emit_open_add_file_dialog};
 use image;
 use tauri::{
     menu::{AboutMetadataBuilder, Menu, MenuItem, SubmenuBuilder},
-    Emitter, Manager,
+    Manager,
 };
 
 use tauri_plugin_clipboard_manager::ClipboardExt;
@@ -70,7 +72,7 @@ fn save_clipboard_image(app: &tauri::AppHandle) {
     .unwrap();
     let path = format!("/Users/blopker/Documents/cliptest/{}", filename);
     image.save(&path).unwrap();
-    app.emit("new-file", path).unwrap();
+    emit_add_file(&app, path);
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -176,16 +178,16 @@ pub fn run() {
         .on_menu_event(|app, event| {
             return match event.id().0.as_str() {
                 "settings" => {
-                    _open_settings_window(&app, None);
+                    _open_settings_window(app, None);
                 }
                 "newprofile" => {
-                    _open_settings_window(&app, Some("/settings/newprofile".to_string()));
+                    _open_settings_window(app, Some("/settings/newprofile".to_string()));
                 }
                 "open" => {
-                    app.emit("open-file", ()).unwrap();
+                    emit_open_add_file_dialog(app);
                 }
                 "clear" => {
-                    app.emit("clear-files", ()).unwrap();
+                    emit_clear_files(app);
                 }
                 "paste" => {
                     save_clipboard_image(app);

@@ -1,9 +1,9 @@
-use std::sync::Arc;
-
+use crate::events::emit_settings_changed;
 use serde::{self};
 use serde_json::json;
 use specta::Type;
-use tauri::{Emitter, Wry};
+use std::sync::Arc;
+use tauri::Wry;
 use tauri_plugin_store::{Store, StoreExt};
 
 use crate::compress::ImageType;
@@ -180,5 +180,5 @@ fn set_settings_data(app: &tauri::AppHandle, settings: SettingsData) {
         SETTINGS_KEY,
         serde_json::to_value(settings.clone()).unwrap(),
     );
-    app.emit("settings-changed", true).unwrap();
+    emit_settings_changed(app);
 }

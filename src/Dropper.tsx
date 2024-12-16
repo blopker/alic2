@@ -1,13 +1,14 @@
-import { type Event, listen } from "@tauri-apps/api/event";
+import type { Event } from "@tauri-apps/api/event";
 import { type DragDropEvent, getCurrentWebview } from "@tauri-apps/api/webview";
 import { BsArrowDownSquare } from "solid-icons/bs";
 import { Show, createSignal, onCleanup } from "solid-js";
 import { Transition } from "solid-transition-group";
 import { commands } from "./bindings";
+import { addFileListener } from "./listeners";
 import { addFile } from "./store";
 
-listen<string>("new-file", (path) => {
-  addFile(path.payload);
+addFileListener((path) => {
+  addFile(path);
 });
 
 export default function Dropper() {

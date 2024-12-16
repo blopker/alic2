@@ -1,10 +1,10 @@
-import { listen } from "@tauri-apps/api/event";
 import { open } from "@tauri-apps/plugin-dialog";
 import { FaSolidXmark } from "solid-icons/fa";
 import { VsAdd, VsSettings } from "solid-icons/vs";
-import { type JSXElement, Show, onCleanup } from "solid-js";
+import { type JSXElement, Show } from "solid-js";
 import { type ProfileData, commands } from "./bindings";
 import { FILE_TYPES } from "./constants";
+import { openFileDialogListener } from "./listeners";
 import { SettingsSelect } from "./settings/SettingsUI";
 import {
   getProfileActive,
@@ -13,6 +13,10 @@ import {
 } from "./settings/settingsData";
 import { addFile, clearFiles, store } from "./store";
 import { toHumanReadableSize } from "./utils";
+
+openFileDialogListener(() => {
+  openFile();
+});
 
 async function openFile() {
   const file = await open({
@@ -34,12 +38,6 @@ async function openFile() {
 }
 
 export default function BottomBar() {
-  const unlisten = listen("open-file", async () => {
-    await openFile();
-  });
-  onCleanup(async () => {
-    (await unlisten)();
-  });
   const options = () => {
     const options: Array<{ label: string; value: ProfileData | null }> =
       settings.profiles.map((p) => {

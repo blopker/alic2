@@ -1,11 +1,11 @@
-import { listen } from "@tauri-apps/api/event";
 import { createStore } from "solid-js/store";
 import { type FileEntry, commands } from "./bindings";
 import { compressImage } from "./compress";
+import { clearFilesListener } from "./listeners";
 import { getProfileActive, settings } from "./settings/settingsData";
 import { Semaphore } from "./utils";
 
-listen("clear-files", clearFiles);
+clearFilesListener(clearFiles);
 
 const CPU_COUNT = await commands.getCpuCount();
 const semaphore = new Semaphore(0);
