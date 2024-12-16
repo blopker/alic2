@@ -3,6 +3,8 @@ mod events;
 mod macos;
 mod settings;
 
+use std::hash::{DefaultHasher, Hash, Hasher};
+
 use events::{emit_add_file, emit_clear_files, emit_open_add_file_dialog};
 use image;
 use tauri::{
@@ -59,18 +61,25 @@ fn save_clipboard_image(app: &tauri::AppHandle) {
 
     // Read filename
     let text_result = app.clipboard().read_text();
-    if text_result.is_err() {
-        println!("clip: no text {:?}", text_result);
+    if text_result.is_ok() {
+        println!(
+            "Not just image data, probably a file copy. Not supported: {:?}",
+            text_result
+        );
         return;
     }
-    let filename = text_result.unwrap();
+
+    // get nicely printed current time to the second, with no external dependencies
     let image = image::RgbaImage::from_raw(
         clip_image.width(),
         clip_image.height(),
         clip_image.rgba().into(),
     )
     .unwrap();
-    let path = format!("/Users/blopker/Documents/cliptest/{}", filename);
+    let mut hasher = DefaultHasher::new();
+    clip_image.rgba().hash(&mut hasher);
+    let h = hasher.finish();
+    let path = format!("/Users/blopker/Documents/cliptest/{h}.png");
     image.save(&path).unwrap();
     emit_add_file(&app, path);
 }
@@ -163,6 +172,7 @@ pub fn run() {
                     true,
                     Some("CmdOrCtrl+D"),
                 )?)
+                // Doesn't work with file paste, just image data
                 .item(&MenuItem::with_id(
                     app,
                     "paste",
