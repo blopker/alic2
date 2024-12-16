@@ -2,8 +2,11 @@
 
 ## Unreleased
 
+## [2.1.7] - 2024-12-16
+
 - Update deps
 - Add help text
+
 
 ## [2.1.6] - 2024-12-12
 
